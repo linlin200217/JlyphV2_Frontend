@@ -9,8 +9,9 @@
 </template>
 
 <script setup lang="ts">
-import BaseFrame from "./BaseFrame.vue";
 import Icon from "./Icon.vue";
+import BaseFrame from "./BaseFrame.vue";
+
 </script>
 
 <style scoped></style>

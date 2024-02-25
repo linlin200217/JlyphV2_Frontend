@@ -34,15 +34,11 @@ export const upload_post = (data: upload_request_form) =>
 
 // --------- pregenerate ---------
 interface pregenerate_request_form {
-  design: string
-  prompt1: string | Array<string>
-  prompt2: string | null
-  guide1: number
-  guide2: number | null
+  prompt: string | Array<string>
 }
 
 interface pre_image {
-  prompt: string
+  status: string
   image_id: string
 }
 

@@ -6,6 +6,11 @@ export default {
   ],
   theme: {
     extend: {
+      height: {
+        '4/5': '80%',
+        '1/8': '12.5%',
+        '1/10': '10%',
+      },
       colors: {
         'dark-green': '#274E13',
         'light-green': '#97AB8A',
