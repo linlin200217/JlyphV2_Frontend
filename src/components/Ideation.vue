@@ -22,11 +22,11 @@
                 <Icon icon_path="/src/assets/Gallery.png"></Icon>
 
                 <div class=" grow flex flex-row flex-nowrap justify-evenly items-center object-contain">
-                    <div v-for="imageId in promptImages"
-                        class="h-full w-1/4 items-center object-contain"
+                    <div v-for="imageId in promptImages" class="h-full w-1/4 items-center object-contain"
                         :class="{ 'border-2 border-dashed border-light-green': selectedImageId === imageId }"
                         @click="selectImage(imageId)">
-                        <img :src="getImageById(imageId)" class="h-full w-full box-border shadow-xl hover:shadow-light-green object-contain" />
+                        <img :src="get_image_url(imageId)"
+                            class="h-full w-full box-border shadow-xl hover:shadow-light-green object-contain" />
                     </div>
                 </div>
 
@@ -45,32 +45,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue"
+import { ref, watch } from "vue"
 import { storeToRefs } from 'pinia'
 
 import Icon from "./Icon.vue";
 import BaseFrame from "./BaseFrame.vue";
 
-import { pregenerate_post } from '/src/api/index.ts'
-import { userSelection } from '/src/store/modules/userSelection.ts'
+import { pregenerate_post, get_image_url } from '@/api/index.ts'
+import { userSelection } from '@/store/modules/userSelection.ts'
 
 const { selectedImageId } = storeToRefs(userSelection());
 
 const uploading = ref(false)
 const refreshLoading = ref(false)
 const userPrompt = ref("")
-const promptImages = ref(["ideal1708700765.png", "ideal1708700922.png", "ideal1708701123.png"])
+const promptImages = ref()
 
 const uploadPrompt = () => {
     uploading.value = true
 
     let data = {
-        prompt: userPrompt.value
+        user_prompt: userPrompt.value
     }
 
     pregenerate_post(data).then(response => {
-        console.log(response);
-
+        promptImages.value = response.image_id;
         uploading.value = false
     }).catch(error => {
         console.log(error)
@@ -78,17 +77,33 @@ const uploadPrompt = () => {
     })
 }
 
-const getImageById = (id: string) => {
-    return "/public/" + id
-}
-
 const promptRefresh = () => {
-    refreshLoading.value = !refreshLoading.value
+    if (userPrompt.value) {
+        refreshLoading.value = true
+
+        let data = {
+            user_prompt: userPrompt.value
+        }
+
+        pregenerate_post(data).then(response => {
+            promptImages.value = response.image_id;
+            refreshLoading.value = false
+        }).catch(error => {
+            console.log(error)
+            refreshLoading.value = false
+        })
+    } else {
+        alert("Please fill in the prompt")
+    }
 }
 
 const selectImage = (id: string) => {
     selectedImageId.value = id
 }
+
+watch(promptImages, () => {
+    selectedImageId.value = ""
+})
 </script>
 
 <style scoped></style>

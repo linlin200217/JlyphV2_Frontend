@@ -15,10 +15,10 @@
                 <div>
                     <table class="table table-xs font-bold">
                         <thead class="text-light-green">
-                            <tr id="tableHeader">
+                            <tr id="tableHeader" ref="tableHeader">
                             </tr>
                         </thead>
-                        <tbody id="tableBody" class="text-dark-green">
+                        <tbody id="tableBody" ref="tableBody" class="text-dark-green">
                         </tbody>
                     </table>
                 </div>
@@ -27,7 +27,7 @@
                 <div class="w-full py-1 px-2 flex flex-row flex-nowrap">
                     <Icon icon_path="/src/assets/WordCloud.png" class="my-auto"></Icon>
                     <input type="text" v-model="userSearch" placeholder="Search"
-                        class="input input-bordered input-sm input-ghost w-full max-w-xs mr-2 text-dark-green" />
+                        class="input input-bordered input-sm input-ghost w-full mr-2" />
                     <button class="btn btn-sm btn-ghost btn-outline w-12" @click="uploadSearch">
                         <span v-if="uploading" class="loading loading-dots loading-lg text-dark-green"></span>
                         <svg v-else t="1708698132917" class="icon" viewBox="0 0 1024 1024" version="1.1"
@@ -52,13 +52,17 @@
 
 <script setup lang="ts">
 import { ref } from "vue"
+import { storeToRefs } from 'pinia'
 import * as papa from "papaparse"
 import VueWordCloud from 'vuewordcloud'
 
-import { upload_post } from '/src/api/index.ts'
-
 import Icon from "./Icon.vue";
 import BaseFrame from "./BaseFrame.vue";
+
+import { upload_post } from '@/api/index.ts'
+import { userSelection } from '@/store/modules/userSelection.ts'
+
+const { Categorical, Numerical } = storeToRefs(userSelection());
 
 const form = ref(null)
 const file = ref(null)
@@ -67,11 +71,14 @@ const uploading = ref(false)
 const word_cloud_spacing = ref(1)
 const word_cloud_data = ref()
 
+const tableHeader =ref<HTMLElement | null | undefined>(null)
+const tableBody =ref<HTMLElement | null | undefined>(null)
+
 const createDataElement = (htmlTag, innerText, idParent) => {
     let node = document.createElement(htmlTag);
     let textnode = document.createTextNode(innerText);
     node.appendChild(textnode);
-    document.getElementById(idParent).appendChild(node);
+    document.getElementById(idParent)?.appendChild(node);
 }
 
 const createHeaderElement = (columnText) => {
@@ -82,8 +89,7 @@ const createCellData = (rowIndex, dataIndex, cellText) => {
     if (dataIndex === 0) {
         let node = document.createElement("tr");
         node.setAttribute("id", "row" + rowIndex);
-        document.getElementById("tableBody").appendChild(node);
-
+        tableBody.value?.appendChild(node);
         createDataElement("td", cellText, "row" + rowIndex);
     } else {
         createDataElement("td", cellText, "row" + rowIndex);
@@ -107,8 +113,8 @@ const handleFileUpload = async () => {
             reader.onload = event => {
                 let content = event.target.result
                 try {
-                    document.getElementById("tableHeader").replaceChildren();
-                    document.getElementById("tableBody").replaceChildren();
+                    tableHeader.value?.replaceChildren();
+                    tableBody.value?.replaceChildren();
 
                     papa.parse(content, {
                         complete: (results) => {
@@ -132,13 +138,19 @@ const handleFileUpload = async () => {
             };
             reader.readAsText(fileData);
 
-            word_cloud_data.value = ['romance', 'horror', 'fantasy', 'adventure', 'romance', 'horror']
+            upload_post(formData).then(response => {
+                console.log(response);
+                Categorical.value = response.Categorical
 
-            // upload_post(formData).then(response => {
-            //     console.log(response);
-            // }).catch(error => {
-            //     console.log(error)
-            // })
+                console.log(Categorical.value);
+                console.log(Object.keys(Categorical.value).length);
+                
+                
+                Numerical.value = response.Numerical
+                word_cloud_data.value = response.Wordcloud;
+            }).catch(error => {
+                console.log(error)
+            })
         }
     }
 }
