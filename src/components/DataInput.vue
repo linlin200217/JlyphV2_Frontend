@@ -140,12 +140,8 @@ const handleFileUpload = async () => {
 
             upload_post(formData).then(response => {
                 console.log(response);
+                
                 Categorical.value = response.Categorical
-
-                console.log(Categorical.value);
-                console.log(Object.keys(Categorical.value).length);
-                
-                
                 Numerical.value = response.Numerical
                 word_cloud_data.value = response.Wordcloud;
             }).catch(error => {

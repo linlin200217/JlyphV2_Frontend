@@ -73,12 +73,13 @@ import BaseFrame from "./BaseFrame.vue";
 
 import { maskselect_post, get_image_url } from '@/api/index.ts'
 import { userSelection } from '@/store/modules/userSelection.ts'
-const { selectedImageId, Categorical_num, Numerical_num } = storeToRefs(userSelection());
+const { selectedImageId, maskData, Categorical_num, Numerical_num } = storeToRefs(userSelection());
 
 const uploading = ref(false);
 
 const imageWidth = ref(0);
 const imageHeight = ref(0);
+const mask_refine = ref(2);
 
 const selectableImage = ref<HTMLElement | null | undefined>(null)
 const coverSvg = ref<SVGSVGElement | null | undefined>(null)
@@ -89,6 +90,20 @@ const selectionSize = reactive({
     width: 0,
     height: 0,
 })
+
+interface mask_data {
+    widget: {
+        'x': number,
+        'y': number,
+        'width': number,
+        'height': number,
+    },
+    image_id: string,
+    mask_refine: number,
+    categorical: string,
+    numerical: string,
+    mask_id: string
+}
 
 const imageLoaded = () => {
     if (selectableImage.value) {
@@ -105,7 +120,7 @@ let brush;
 const initBrush = () => {
     if (coverSvg.value) {
         let svg = d3.select(coverSvg.value)
-        
+
         brush = d3.brush()
             .extent([[0, 0], [imageWidth.value, imageHeight.value]])
             .on('start brush end', function (event) {
@@ -113,7 +128,7 @@ const initBrush = () => {
                     let [[x1, y1], [x2, y2]] = event.selection;
 
                     let imageSideLength = Math.min(imageWidth.value, imageHeight.value)
-                    let scale = 512/imageSideLength;
+                    let scale = 512 / imageSideLength;
 
                     if (imageWidth.value != imageHeight.value) {
                         let difference = imageHeight.value - imageWidth.value
@@ -125,7 +140,7 @@ const initBrush = () => {
                     } else {
                         selectionSize.x = Math.abs(x1) * scale;
                     }
-                    
+
                     selectionSize.y = Math.abs(y1) * scale;
                     selectionSize.width = Math.abs(x2 - x1) * scale;
                     selectionSize.height = Math.abs(y2 - y1) * scale;
@@ -154,18 +169,35 @@ const uploadMasks = () => {
                 'width': selectionSize.width,
                 'height': selectionSize.height,
             },
-            image_id: selectedImageId.value
+            image_id: selectedImageId.value,
+            mask_refine: mask_refine.value
         }
 
-        console.log(data);
-
-        // maskselect_post(data).then(response => {
-
-        //     uploading.value = false
-        // }).catch(error => {
-        //     console.log(error)
-        //     uploading.value = false
-        // })
+        let mask: mask_data
+        mask = {
+            widget: {
+                'x': selectionSize.x,
+                'y': selectionSize.y,
+                'width': selectionSize.width,
+                'height': selectionSize.height,
+            },
+            image_id: selectedImageId.value,
+            mask_refine: mask_refine.value,
+            categorical: '',
+            numerical: '',
+            mask_id: '',
+        }
+        
+        maskselect_post(data).then(response => {
+            mask.mask_id = response.mask_image_id;
+            maskData.value.push(mask);
+            uploading.value = false
+            clearBrush();
+        }).catch(error => {
+            console.log(error)
+            uploading.value = false
+            clearBrush();
+        })
     } else {
         alert("Mask or image empty")
     }
@@ -185,4 +217,5 @@ onBeforeUnmount(() => {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-}</style>
+}
+</style>

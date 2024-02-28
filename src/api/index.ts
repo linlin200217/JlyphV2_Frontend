@@ -58,7 +58,6 @@ interface maskselect_request_form {
 
 interface maskselect_response_form {
   mask_image_id: string
-  outlier_image_id: string
 }
 
 export const maskselect_post = (data: maskselect_request_form) =>

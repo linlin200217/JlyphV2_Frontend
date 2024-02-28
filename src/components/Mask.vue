@@ -5,8 +5,8 @@
                 <Icon icon_path="/src/assets/Mask.png"></Icon>
             </div>
 
-            <div class="grow flex flex-row flex-nowrap overflow-scroll divide-y-2 divide-dashed divide-light-green">
-
+            <div class="grow flex flex-row flex-nowrap overflow-scroll">
+                <MaskSingle v-for="(item, index) in maskData" :slot_id="index" :num_key="Numerical_key" :cat_key="Categorical_key"></MaskSingle>
             </div>
 
             <div class="h-full w-fit mx-2 flex flex-col flex-nowrap justify-evenly place-self-end">
@@ -43,9 +43,15 @@
 
 <script setup lang="ts">
 import { ref } from "vue"
+import { storeToRefs } from 'pinia'
 
 import Icon from "./Icon.vue";
 import BaseFrame from "./BaseFrame.vue";
+import MaskSingle from "./Mask-single.vue";
+
+import { get_image_url } from '@/api/index.ts'
+import { userSelection } from '@/store/modules/userSelection.ts'
+const { maskData, selectedMaskNumber, Categorical_key, Categorical_num, Numerical_key, Numerical_num } = storeToRefs(userSelection());
 
 const automating = ref(false);
 const uploading = ref(false);
@@ -55,6 +61,15 @@ const autoGenerate = () => {
 }
 
 const uploadMasks = () => {
+    if ( selectedMaskNumber.value < Math.max(Categorical_num.value, Numerical_num.value) ) {
+        alert("Not Enough Mask Selected!")
+        return
+    } else if ( selectedMaskNumber.value > Categorical_num.value + Numerical_num.value ) {
+        alert("Too Many Mask Selected!")
+        return
+    } else {
+
+    }
     uploading.value = !uploading.value;
 }
 </script>
