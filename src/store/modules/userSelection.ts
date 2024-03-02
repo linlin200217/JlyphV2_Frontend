@@ -6,6 +6,7 @@ export const userSelection = defineStore('userSelection', () => {
   const Categorical = ref()
   const Numerical = ref()
   const selectedImageId = ref('')
+  const userPrompt = ref('')
 
   interface mask_data {
     widget: {
@@ -64,6 +65,10 @@ export const userSelection = defineStore('userSelection', () => {
   })
   const Num_selected = ref<string[]>([])
 
+  const rgba_images_by_category = ref('')
+  const element_key = computed(() => {
+    return Object.keys(rgba_images_by_category.value)
+  })
   return {
     Categorical,
     Categorical_key,
@@ -73,8 +78,11 @@ export const userSelection = defineStore('userSelection', () => {
     Numerical_key,
     Numerical_num,
     Num_selected,
+    userPrompt,
     selectedImageId,
     maskData,
     selectedMaskNumber,
+    rgba_images_by_category,
+    element_key,
   }
 })

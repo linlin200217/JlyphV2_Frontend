@@ -54,11 +54,10 @@ import BaseFrame from "./BaseFrame.vue";
 import { pregenerate_post, get_image_url } from '@/api/index.ts'
 import { userSelection } from '@/store/modules/userSelection.ts'
 
-const { selectedImageId } = storeToRefs(userSelection());
+const { selectedImageId, userPrompt } = storeToRefs(userSelection());
 
 const uploading = ref(false)
 const refreshLoading = ref(false)
-const userPrompt = ref("")
 const promptImages = ref()
 
 const uploadPrompt = () => {

@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col flex-nowrap justify-between m-4 w-full w-40">
+    <div class="flex flex-col flex-nowrap justify-between m-4 w-40">
         <div class="w-full h-3/4 relative">
             <button class="btn btn-circle btn-xs btn-ghost absolute bottom-2 right-1 text-white" @click="refreshMask">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="white" viewBox="0 0 1024 1024"
@@ -22,11 +22,11 @@
 
         <div class="w-full h-1/4">
             <div class="w-full h-1/2">
-                <select class="select select-bordered select-ghost select-xs w-1/2 h-full" v-model="categorical">
+                <select class="select select-bordered select-ghost select-xs w-1/2 h-full" v-model="select_cat">
                     <option disabled>Categorical</option>
                     <option v-for="item in cat_key" :disabled="Cat_selected.includes(item)">{{ item }}</option>
                 </select>
-                <select class="select select-bordered select-ghost select-xs w-1/2 h-full" v-model="numerical">
+                <select class="select select-bordered select-ghost select-xs w-1/2 h-full" v-model="select_num">
                     <option disabled>Numerical</option>
                     <option v-for="item in num_key" :disabled="Num_selected.includes(item)">{{ item }}</option>
                 </select>
@@ -54,8 +54,8 @@ const { maskData, Cat_selected, Num_selected } = storeToRefs(userSelection());
 const props = defineProps(['slot_id', 'num_key', 'cat_key'])
 
 const maskRefine = ref(2)
-const categorical = ref("Categorical")
-const numerical = ref("Numerical")
+const select_cat = ref("Categorical")
+const select_num = ref("Numerical")
 
 const removeMask = () => {
     maskData.value.splice(props.slot_id, 1)
@@ -77,22 +77,22 @@ const refreshMask = () => {
     })
 }
 
-watch(categorical, (newValue, oldValue) => {
+watch(select_cat, (newValue, oldValue) => {
     let index = Cat_selected.value.indexOf(oldValue);
     if (index > -1) {
         Cat_selected.value.splice(index, 1)
     }
     Cat_selected.value.push(newValue)
-    console.log(Cat_selected.value);
-    
+    maskData.value[props.slot_id].categorical = newValue
 })
 
-watch(numerical, (newValue, oldValue) => {
+watch(select_num, (newValue, oldValue) => {
     let index = Num_selected.value.indexOf(oldValue);
     if (index > -1) {
         Num_selected.value.splice(index, 1)
     }
     Num_selected.value.push(newValue)
+    maskData.value[props.slot_id].numerical = newValue
 })
 </script>
 

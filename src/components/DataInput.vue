@@ -43,7 +43,7 @@
                 </div>
                 <div class="w-full h-4/5 flex-none">
                     <vue-word-cloud font-family="Sans" font-weight="bold" font-variant="normal" :spacing=word_cloud_spacing
-                        :words=word_cloud_data :color="() => get_random_color()" />
+                        :words=word_cloud_data :color="() => get_random_color()" @click="handle_click($event)"/>
                 </div>
             </div>
         </div>
@@ -62,7 +62,7 @@ import BaseFrame from "./BaseFrame.vue";
 import { upload_post } from '@/api/index.ts'
 import { userSelection } from '@/store/modules/userSelection.ts'
 
-const { Categorical, Numerical } = storeToRefs(userSelection());
+const { Categorical, Numerical, userPrompt } = storeToRefs(userSelection());
 
 const form = ref(null)
 const file = ref(null)
@@ -155,6 +155,11 @@ const get_random_color = () => {
     let color_list = ['#660000', '#783F04', '#7F6000', '#274E13', '#0C343D', '#073763', '#20124D', '#4C1130'];
     let random_index = Math.floor(Math.random() * color_list.length);
     return color_list[random_index];
+}
+
+const handle_click = (event) => {
+    userSearch.value = event.target.textContent;
+    userPrompt.value = event.target.textContent;
 }
 
 const uploadSearch = () => {

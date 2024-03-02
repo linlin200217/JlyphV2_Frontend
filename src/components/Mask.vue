@@ -6,22 +6,18 @@
             </div>
 
             <div class="grow flex flex-row flex-nowrap overflow-scroll">
-                <MaskSingle v-for="(item, index) in maskData" :slot_id="index" :num_key="Numerical_key" :cat_key="Categorical_key"></MaskSingle>
+                <MaskSingle v-for="(_, index) in maskData" :slot_id="index" :num_key="Numerical_key" :cat_key="Categorical_key"></MaskSingle>
             </div>
 
             <div class="h-full w-fit mx-2 flex flex-col flex-nowrap justify-evenly place-self-end">
-                <button class="btn btn-sm btn-ghost btn-outline text-dark-green w-16 h-16" @click="autoGenerate">
-                    <span v-if="automating" class="loading loading-dots loading-sm text-dark-green"></span>
-                    <svg v-else t="1708872337657" class="icon h-6 mt-2" viewBox="0 0 1024 1024" version="1.1"
-                        xmlns="http://www.w3.org/2000/svg" p-id="12086">
+                <button class="btn btn-sm btn-ghost btn-outline text-dark-green w-16 h-16" @click="removeMasks">
+                    <svg t="1708973332700" class="icon h-6 mt-2" viewBox="0 0 1024 1024" version="1.1"
+                        xmlns="http://www.w3.org/2000/svg" p-id="4214">
                         <path
-                            d="M512.372 1023.943q-4.56 0-9.187-0.091a510.104 510.104 0 0 1-192.62-41.408l-58.836-25.212 150.45-165.551 67.474 61.33-60.784 66.814c86.19 22.02 176.801 16.094 260.882-17.894 215.04-86.885 319.26-332.55 232.342-547.591a419.754 419.754 0 0 0-73.686-119.847l68.546-60.077A512.121 512.121 0 0 1 512.372 1024z m-383.27-172.242A511.825 511.825 0 0 1 710.304 40.094l66.107 27.776-173.245 156.49-61.115-67.667 61.366-55.427A420.894 420.894 0 0 0 197.328 791.19z"
-                            p-id="12087" fill="#274E13"></path>
-                        <path
-                            d="M292.681 713.937l169.165-408.812h99.9l169.165 408.812H629.175l-39.892-94.384H434.275l-39.835 94.384zM512.11 403.806l-58.231 142.802h116.45z"
-                            p-id="12088" fill="#274E13"></path>
+                            d="M448 256h128V128H448v128z m192-128v128h192a64 64 0 0 1 64 64v128a64 64 0 0 1-54.976 63.36l44.544 311.616a64 64 0 0 1-63.36 73.024H201.792a64 64 0 0 1-63.36-73.024L183.04 511.36A64 64 0 0 1 128 448V320a64 64 0 0 1 64-64h192V128a64 64 0 0 1 64-64h128a64 64 0 0 1 64 64z m136.512 320H832V320H576 448 192v128h584.512z m0 64H247.488l-45.696 320H320v-128h64v128h96v-128h64v128H640v-128h64v128h118.208l-45.696-320z"
+                            fill="#274E13" fill-opacity="1" p-id="4215"></path>
                     </svg>
-                    <span class="mb-2">Default</span>
+                    <span class="mb-2">Clear</span>
                 </button>
                 <button class="btn btn-sm btn-ghost btn-outline text-dark-green w-16 h-16" @click="uploadMasks">
                     <span v-if="uploading" class="loading loading-dots loading-sm text-dark-green"></span>
@@ -49,15 +45,15 @@ import Icon from "./Icon.vue";
 import BaseFrame from "./BaseFrame.vue";
 import MaskSingle from "./Mask-single.vue";
 
-import { get_image_url } from '@/api/index.ts'
+import { generate_element_post } from '@/api/index.ts'
 import { userSelection } from '@/store/modules/userSelection.ts'
-const { maskData, selectedMaskNumber, Categorical_key, Categorical_num, Numerical_key, Numerical_num } = storeToRefs(userSelection());
+const { userPrompt, maskData, selectedMaskNumber, Categorical_key, Categorical_num, Cat_selected, Numerical_key, Numerical_num, Num_selected, rgba_images_by_category } = storeToRefs(userSelection());
 
-const automating = ref(false);
 const uploading = ref(false);
 
-const autoGenerate = () => {
-    automating.value = !automating.value;
+const removeMasks = () => {
+    Cat_selected.value = [];
+    Num_selected.value = [];
 }
 
 const uploadMasks = () => {
@@ -68,9 +64,53 @@ const uploadMasks = () => {
         alert("Too Many Mask Selected!")
         return
     } else {
+        let mask_forall_data = []
+        for (let i = 0; i < maskData.value.length; i++) {
+            let item = maskData.value[i];
+            if ( !item.categorical && !item.numerical ) {
+                alert(`Please select attribute for mask ${i}!`)
+                uploading.value = false
+                return
+            }
 
+            if (item.categorical) {
+                let data = {
+                    Colname: item.categorical,
+                    Widget: item.widget,
+                    Refine_num: item.mask_refine,
+                    Class: "Categorical",
+                }
+                mask_forall_data.push(data);
+            }
+
+            if (item.numerical) {
+                let data = {
+                    Colname: item.numerical,
+                    Widget: item.widget,
+                    Refine_num: item.mask_refine,
+                    Class: "Numerical",
+                }
+                mask_forall_data.push(data);
+            }
+        }
+
+        let data = {
+            prompt: userPrompt.value,
+            mask_forall: mask_forall_data,
+            chosen_image_id: maskData.value[0].image_id,
+        }
+
+        uploading.value = true
+        generate_element_post(data).then(response => {
+            console.log(response.rgba_images_by_category);
+            
+            rgba_images_by_category.value = response.rgba_images_by_category
+            uploading.value = false
+        }).catch(error => {
+            console.log(error)
+            uploading.value = false
+        })
     }
-    uploading.value = !uploading.value;
 }
 </script>
 
