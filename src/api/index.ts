@@ -6,6 +6,8 @@ enum API {
   MASKSELECT_POST = '/maskselect',
   GENERATE_ELEMENT_POST = '/generate_element',
   REGENERATE = '/regenerate',
+  GENERATE_NUMERICAL_ELEMENT = '/generate_numerical_element',
+  GENERATE_EXAMPLE = '/generate_example',
 }
 
 // --------- upload ---------
@@ -113,6 +115,61 @@ interface regenerate_response_form {
 
 export const regenerate_post = (data: regenerate_request_form) =>
   request.post<any, regenerate_response_form>(API.REGENERATE, data, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
+  })
+
+// --------- generate_numerical_element ---------
+interface generate_numerical_element_request {
+  mask_forall: Array<all_masks>,
+  chosen_image_id: string
+}
+
+interface outlier_element {
+  Colname: string,
+  widget: widget_form,
+  Refine_num: number,
+  Class: string // ( "Categorical"/"Numerical" )
+  outlier_id: string,
+  Layer: number,
+  Form: string,
+  Gap: number
+}
+
+interface generate_numerical_element_response {
+  defalt_layer_forexample: Array<outlier_element>
+}
+
+export const generate_numerical_element = (data: generate_numerical_element_request) =>
+  request.post<any, generate_numerical_element_response>(API.GENERATE_NUMERICAL_ELEMENT, data, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
+  })
+
+// --------- generate_example ---------
+interface outlier_element_adjusted {
+  "Colname": string,
+  "widget": widget_form,
+  "Refine_num": number,
+  "Class": string, // ( "Categorical"/"Numerical" )
+  "outlier_id": string,
+  "Layer": number,
+  "Form": string, // 'Size' / 'Number_Vertical', 'Number_Horizontal', 'Number_Path', None,
+  "Gap": number // ,None,
+}
+
+interface generate_example_request {
+  dic_array: Array<outlier_element_adjusted>
+  image_id: string
+}
+
+interface generate_example_response {
+  example: string
+}
+export const generate_example = (data: generate_example_request) =>
+  request.post<any, generate_example_response>(API.GENERATE_EXAMPLE, data, {
     headers: {
       'Access-Control-Allow-Origin': '*',
     },

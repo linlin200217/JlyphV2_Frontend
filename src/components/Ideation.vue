@@ -5,7 +5,7 @@
                 <Icon icon_path="/src/assets/Prompt.png" class="my-auto"></Icon>
                 <input type="text" v-model="userPrompt" placeholder="Prompt Input"
                     class="input input-bordered input-sm input-ghost w-full mr-2" />
-                <button class="btn btn-sm btn-ghost btn-outline w-12" @click="uploadPrompt">
+                <button class="btn btn-sm btn-ghost btn-outline w-12 text-dark-green" @click="uploadPrompt">
                     <span v-if="uploading" class="loading loading-dots loading-lg text-dark-green"></span>
                     <svg v-else t="1708698132917" class="icon" viewBox="0 0 1024 1024" version="1.1"
                         xmlns="http://www.w3.org/2000/svg" p-id="8193" id="mx_n_1708698132917">
@@ -30,7 +30,7 @@
                     </div>
                 </div>
 
-                <button class="btn btn-circle btn-xs btn-ghost" @click="promptRefresh">
+                <button class="btn btn-circle btn-xs btn-ghost text-dark-green" @click="promptRefresh">
                     <span v-if="refreshLoading" class="loading loading-spinner loading-xs text-dark-green"></span>
                     <svg v-else t="1708703396523" class="icon" viewBox="0 0 1024 1024" version="1.1"
                         xmlns="http://www.w3.org/2000/svg" p-id="5847">

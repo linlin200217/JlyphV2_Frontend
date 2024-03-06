@@ -5,7 +5,7 @@
 
         </div>
         <div class="w-full h-[70%] relative">
-            <button class="btn btn-circle btn-xs btn-ghost absolute bottom-1 left-1 text-white" @click="refreshElement">
+            <button class="btn btn-circle btn-xs btn-ghost absolute bottom-1 left-1 text-dark-green" @click="refreshElement">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="#274E13" viewBox="0 0 1024 1024"
                     stroke="currentColor">
                     <path stroe-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -25,11 +25,8 @@
 
 <script setup lang="ts">
 import { ref } from "vue"
-import { storeToRefs } from 'pinia'
 
 import { regenerate_post, get_image_url } from '@/api/index.ts'
-import { userSelection } from '@/store/modules/userSelection.ts'
-const {  } = storeToRefs(userSelection());
 
 const props = defineProps(['slot_data', 'mask_data'])
 const wholePrompt = ref('')

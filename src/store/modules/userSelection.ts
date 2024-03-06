@@ -27,6 +27,18 @@ export const userSelection = defineStore('userSelection', () => {
     return maskData.value.length;
   })
 
+  const mask_order = computed(() => {
+    let order: Array<string> = []
+    for (let i = 0; i < maskData.value.length; i++) {
+      if (maskData.value[i].categorical) {
+        order.push(maskData.value[i].categorical)
+      } else if (maskData.value[i].numerical) {
+        order.push(maskData.value[i].numerical)
+      }
+    }
+    return order
+  })
+  
   const Categorical_key = computed(() => {
     if (Categorical.value) {
       let obj = Categorical.value
@@ -66,9 +78,9 @@ export const userSelection = defineStore('userSelection', () => {
   const Num_selected = ref<string[]>([])
 
   const rgba_images_by_category = ref('')
-  const element_key = computed(() => {
-    return Object.keys(rgba_images_by_category.value)
-  })
+
+  const defalt_layer_example = ref([])
+
   return {
     Categorical,
     Categorical_key,
@@ -82,7 +94,8 @@ export const userSelection = defineStore('userSelection', () => {
     selectedImageId,
     maskData,
     selectedMaskNumber,
+    mask_order,
     rgba_images_by_category,
-    element_key,
+    defalt_layer_example
   }
 })

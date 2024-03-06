@@ -6,7 +6,8 @@
             </div>
 
             <div class="grow flex flex-row flex-nowrap overflow-scroll">
-                <MaskSingle v-for="(_, index) in maskData" :slot_id="index" :num_key="Numerical_key" :cat_key="Categorical_key"></MaskSingle>
+                <MaskSingle v-for="(_, index) in maskData" :slot_id="index" :num_key="Numerical_key"
+                    :cat_key="Categorical_key"></MaskSingle>
             </div>
 
             <div class="h-full w-fit mx-2 flex flex-col flex-nowrap justify-evenly place-self-end">
@@ -47,7 +48,7 @@ import MaskSingle from "./Mask-single.vue";
 
 import { generate_element_post } from '@/api/index.ts'
 import { userSelection } from '@/store/modules/userSelection.ts'
-const { userPrompt, maskData, selectedMaskNumber, Categorical_key, Categorical_num, Cat_selected, Numerical_key, Numerical_num, Num_selected, rgba_images_by_category } = storeToRefs(userSelection());
+const { userPrompt, maskData, selectedMaskNumber, mask_order, Categorical_key, Categorical_num, Cat_selected, Numerical_key, Numerical_num, Num_selected, rgba_images_by_category } = storeToRefs(userSelection());
 
 const uploading = ref(false);
 
@@ -57,17 +58,17 @@ const removeMasks = () => {
 }
 
 const uploadMasks = () => {
-    if ( selectedMaskNumber.value < Math.max(Categorical_num.value, Numerical_num.value) ) {
+    if (selectedMaskNumber.value < Math.max(Categorical_num.value, Numerical_num.value)) {
         alert("Not Enough Mask Selected!")
         return
-    } else if ( selectedMaskNumber.value > Categorical_num.value + Numerical_num.value ) {
+    } else if (selectedMaskNumber.value > Categorical_num.value + Numerical_num.value) {
         alert("Too Many Mask Selected!")
         return
     } else {
         let mask_forall_data = []
         for (let i = 0; i < maskData.value.length; i++) {
             let item = maskData.value[i];
-            if ( !item.categorical && !item.numerical ) {
+            if (!item.categorical && !item.numerical) {
                 alert(`Please select attribute for mask ${i}!`)
                 uploading.value = false
                 return
@@ -102,9 +103,16 @@ const uploadMasks = () => {
 
         uploading.value = true
         generate_element_post(data).then(response => {
-            console.log(response.rgba_images_by_category);
+
+            let sorted_rgba_images = mask_order.value.reduce((obj, key) => {
+                if (response.rgba_images_by_category.hasOwnProperty(key)) {
+                    obj[key] = response.rgba_images_by_category[key];
+                }
+                return obj;
+            }, {});
             
-            rgba_images_by_category.value = response.rgba_images_by_category
+            rgba_images_by_category.value = sorted_rgba_images;
+
             uploading.value = false
         }).catch(error => {
             console.log(error)
