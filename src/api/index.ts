@@ -133,8 +133,7 @@ interface outlier_element {
   Class: string // ( "Categorical"/"Numerical" )
   outlier_id: string,
   Layer: number,
-  Form: string,
-  Gap: number
+  mask_bool: Array<any>
 }
 
 interface generate_numerical_element_response {
@@ -150,14 +149,16 @@ export const generate_numerical_element = (data: generate_numerical_element_requ
 
 // --------- generate_example ---------
 interface outlier_element_adjusted {
-  "Colname": string,
-  "widget": widget_form,
-  "Refine_num": number,
-  "Class": string, // ( "Categorical"/"Numerical" )
-  "outlier_id": string,
-  "Layer": number,
-  "Form": string, // 'Size' / 'Number_Vertical', 'Number_Horizontal', 'Number_Path', None,
-  "Gap": number // ,None,
+  Colname: string,
+  widget: widget_form,
+  Refine_num: number,
+  Class: string, // ( "Categorical"/"Numerical" )
+  outlier_id: string,
+  Layer: number,
+  Form: string, // 'Size' / 'Number_Vertical', 'Number_Horizontal', 'Number_Path', None,
+  Gap: number // ,None,
+  mask_bool: Array<any>,
+  Path_Col: string
 }
 
 interface generate_example_request {

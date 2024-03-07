@@ -38,24 +38,32 @@
                                     class="px-2 mx-auto text-center text-xs text-wrap capitalize rounded-2xl bg-light-green flex">
                                     <span class="m-auto text-black">{{ item.Class }}</span>
                                 </div>
-                                <div v-show="showInputBar(item.Class)" class="flex justify-center items-center">
-                                    <div class="join">
+                                <div v-show="showInputBar(item.Class)"
+                                    class="flex flex-col flex-nowrap justify-center items-center">
+                                    <div class="join h-4">
                                         <input type="text" v-model="gap_input[index]" placeholder="Gap"
-                                            class="input input-bordered input-xs input-ghost w-1/2 mx-auto join-item" />
+                                            class="input input-bordered input-xs input-ghost h-4 w-1/2 join-item" />
                                         <select
-                                            class="select select-bordered select-ghost select-xs h-5 w-1/2 h-full join-item"
+                                            class="select select-bordered select-ghost select-xs h-4 w-1/2 join-item"
                                             v-model="form_selection[index]">
-                                            <option v-for="item in form_options" :value="item" 
+                                            <option v-for="item in form_options" :value="item"
                                                 :disabled="disabled_form_options.includes(item)">{{ item }}</option>
                                         </select>
                                     </div>
-
+                                    <div class="w-full h-4 flex justify-center items-center">
+                                        <select v-show="form_selection[index] === 'Number_Path'"
+                                            class="select select-bordered select-ghost select-xs h-4 w-3/4"
+                                            v-model="path_col[index]">
+                                            <option v-for="col in categorical_options" :value="col" >{{ col }}</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="flex justify-evenly pb-1 my-1">
-                            <button class="btn btn-sm btn-ghost btn-outline min-w-16 text-dark-green" @click="removeSelections">
+                        <div class="flex justify-evenly my-1">
+                            <button class="btn btn-sm btn-ghost btn-outline min-w-16 text-dark-green"
+                                @click="removeSelections">
                                 <svg t="1708973332700" class="icon h-6 mr-2" viewBox="0 0 1024 1024" version="1.1"
                                     xmlns="http://www.w3.org/2000/svg" p-id="4214">
                                     <path
@@ -64,7 +72,8 @@
                                 </svg>
                                 <span class="text-dark-green">Clear</span>
                             </button>
-                            <button class="btn btn-sm btn-ghost btn-outline min-w-20 text-dark-green" @click="uploadPreview">
+                            <button class="btn btn-sm btn-ghost btn-outline min-w-20 text-dark-green"
+                                @click="uploadPreview">
                                 <span v-if="leftPreviewUploading"
                                     class="loading loading-dots loading-md text-dark-green"></span>
                                 <svg v-else t="1708698132917" class="icon h-6" viewBox="0 0 1024 1024" version="1.1"
@@ -100,7 +109,8 @@
 
                 <!-- absolute button -->
                 <div class="absolute bottom-2 right-2">
-                    <button class="btn btn-sm btn-ghost btn-outline min-w-20 text-dark-green" @click="uploadDefaultLayer">
+                    <button class="btn btn-sm btn-ghost btn-outline min-w-20 text-dark-green"
+                        @click="uploadDefaultLayer">
                         <span v-if="defaultLayerUploading"
                             class="loading loading-dots loading-md text-dark-green"></span>
                         <svg v-else t="1708698132917" class="icon h-6" viewBox="0 0 1024 1024" version="1.1"
@@ -121,7 +131,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue"
+import { ref, watch, computed } from "vue"
 import { storeToRefs } from 'pinia'
 
 import Icon from "./Icon.vue";
@@ -136,12 +146,24 @@ const defaultLayerUploading = ref(false)
 const leftPreviewUploading = ref(false)
 const topGenerateUploading = ref(false)
 const form_selection = ref<string[]>([])
+const path_col = ref<string[]>([])
 const gap_input = ref<number[]>([])
 const generate_image_id = ref('')
 
 const form_options = ref(["Size", "Number_Vertical", "Number_Horizontal", "Number_Path"])
 const number_options = form_options.value.slice(1)
 const disabled_form_options = ref<string[]>([])
+
+const categorical_options = computed(() => {
+    let cat_options = []
+    maskData.value.forEach((element) => {
+        if (element.categorical && !element.numerical) {
+            cat_options.push(element.categorical)
+            cat_options = [...new Set(cat_options)]; // remove duplicate
+        }
+    })
+    return cat_options
+})
 
 const uploadDefaultLayer = () => {
     let mask_forall_data = []
@@ -183,7 +205,7 @@ const uploadDefaultLayer = () => {
     generate_numerical_element(data).then(response => {
         defalt_layer_example.value = response.defalt_layer_forexample.sort((a, b) => {
             // descending order
-            return a.Layer < b.Layer ? -1 : 1
+            return a.Layer > b.Layer ? -1 : 1
         })
 
         defaultLayerUploading.value = false
@@ -212,15 +234,22 @@ const uploadPreview = () => {
             Refine_num: defalt_layer_example.value[i].Refine_num,
             Class: defalt_layer_example.value[i].Class,
             outlier_id: defalt_layer_example.value[i].outlier_id,
-            Layer: defalt_layer_example.value[i].Layer
+            Layer: defalt_layer_example.value[i].Layer,
+            mask_bool: defalt_layer_example.value[i].mask_bool,
         }
 
         if (temp.Class === "Numerical") {
             temp["Form"] = form_selection.value[i] || "Size"
-            temp["Gap"] = gap_input.value[i] || 20
+            temp["Gap"] = Number(gap_input.value[i]) || 20
         } else {
             temp["Form"] = null
             temp["Gap"] = null
+        }
+
+        if (temp.Form === "Number_Path") {
+            temp["Path_Col"] = categorical_options.value[i]
+        } else {
+            temp["Path_Col"] = null
         }
         example_array_data.push(temp)
     }
@@ -230,12 +259,10 @@ const uploadPreview = () => {
         image_id: maskData.value[0].image_id
     }
 
-    console.log(data);
-
     leftPreviewUploading.value = true
     generate_example(data).then(response => {
         generate_image_id.value = response.example
-        
+
         leftPreviewUploading.value = false
     }).catch(error => {
         leftPreviewUploading.value = false
@@ -244,8 +271,8 @@ const uploadPreview = () => {
 }
 
 const uploadGeneration = () => {
-    console.log(generate_image_id.value);
-
+    console.log(defalt_layer_example.value);
+    
     topGenerateUploading.value = !topGenerateUploading.value
 }
 
@@ -260,4 +287,9 @@ watch(() => [...form_selection.value], (newValue, _) => {
 })
 </script>
 
-<style scoped></style>
+<style scoped>
+.select-xs {
+  height: 1rem;
+  min-height: 1rem;
+}
+</style>
