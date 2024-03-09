@@ -272,6 +272,7 @@ const uploadPreview = () => {
 
 const uploadGeneration = () => {
     console.log(defalt_layer_example.value);
+    console.log(defalt_layer_example.value);
     
     topGenerateUploading.value = !topGenerateUploading.value
 }
