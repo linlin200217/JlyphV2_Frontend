@@ -23,14 +23,15 @@
                 <div class="h-full w-1/3 flex flex-col flex-nowrap justify-start">
                     <div
                         class="w-full h-fit flex flex-col flex-nowrap justify-start shadow-lg shadow-dark-green bg-white box-border border-2 border-dark-green border-dashed rounded-lg p-1">
-
                         <!-- defalt_layer_example -->
-                        <div class="w-full h-14 flex flex-row flex-nowrap justify-start"
-                            v-for="(item, index) in defalt_layer_example">
+                        <div class="w-full h-14 flex flex-row flex-nowrap justify-start border"
+                            v-for="(item, index) in defalt_layer_example" draggable="true"
+                            @drop="dragenter($event, index)" @dragover="dragover($event, index)"
+                            @dragstart="dragstart(index)">
                             <div class="my-auto">
                                 <span
                                     class="bg-light-green text-dark-green px-2 py-1 text-xs font-bold rounded-full -top-3 -right-3">{{
-                    item.Layer }}</span>
+                    item.Position }}</span>
                             </div>
                             <img :src="get_image_url(item.outlier_id)" class="grow object-contain " />
                             <div class="h-full w-1/3 flex flex-col flex-nowrap justify-center">
@@ -54,7 +55,7 @@
                                         <select v-show="form_selection[index] === 'Number_Path'"
                                             class="select select-bordered select-ghost select-xs h-4 w-3/4"
                                             v-model="path_col[index]">
-                                            <option v-for="col in categorical_options" :value="col" >{{ col }}</option>
+                                            <option v-for="col in categorical_options" :value="col">{{ col }}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -62,16 +63,25 @@
                         </div>
 
                         <div class="flex justify-evenly my-1">
-                            <button class="btn btn-sm btn-ghost btn-outline min-w-16 text-dark-green"
+                            <button class="btn btn-sm btn-ghost btn-outline min-w-4 text-dark-green" @click="reSort">
+                                <svg t="1710095584302" class="icon h-6" viewBox="0 0 1024 1024" version="1.1"
+                                    xmlns="http://www.w3.org/2000/svg" p-id="5938">
+                                    <path
+                                        d="M482.962286 492.032l-51.687619 51.736381-196.559238-196.437333 196.510476-196.608 51.736381 51.687619-99.230476 99.279238h223.329523c140.434286 0 254.659048 111.957333 258.364953 251.465143l0.097524 6.997333c0 142.726095-115.712 258.438095-258.438096 258.438095H154.819048v-73.142857H607.085714a185.295238 185.295238 0 1 0 0-370.590476l-241.371428-0.024381 117.248 117.199238z"
+                                        p-id="5939" fill="#274E13" fill-opacity="1"></path>
+                                </svg>
+                            </button>
+
+                            <button class="btn btn-sm btn-ghost btn-outline min-w-4 text-dark-green"
                                 @click="removeSelections">
-                                <svg t="1708973332700" class="icon h-6 mr-2" viewBox="0 0 1024 1024" version="1.1"
+                                <svg t="1708973332700" class="icon h-6" viewBox="0 0 1024 1024" version="1.1"
                                     xmlns="http://www.w3.org/2000/svg" p-id="4214">
                                     <path
                                         d="M448 256h128V128H448v128z m192-128v128h192a64 64 0 0 1 64 64v128a64 64 0 0 1-54.976 63.36l44.544 311.616a64 64 0 0 1-63.36 73.024H201.792a64 64 0 0 1-63.36-73.024L183.04 511.36A64 64 0 0 1 128 448V320a64 64 0 0 1 64-64h192V128a64 64 0 0 1 64-64h128a64 64 0 0 1 64 64z m136.512 320H832V320H576 448 192v128h584.512z m0 64H247.488l-45.696 320H320v-128h64v128h96v-128h64v128H640v-128h64v128h118.208l-45.696-320z"
                                         fill="#274E13" fill-opacity="1" p-id="4215"></path>
                                 </svg>
-                                <span class="text-dark-green">Clear</span>
                             </button>
+
                             <button class="btn btn-sm btn-ghost btn-outline min-w-20 text-dark-green"
                                 @click="uploadPreview">
                                 <span v-if="leftPreviewUploading"
@@ -138,7 +148,7 @@ import Icon from "./Icon.vue";
 import BaseFrame from "./BaseFrame.vue";
 import ElementSingle from "./Element-single.vue";
 
-import { get_image_url, generate_numerical_element, generate_example } from '@/api/index.ts'
+import { get_image_url, generate_numerical_element, generate_example, final_submission } from '@/api/index.ts'
 import { userSelection } from '@/store/modules/userSelection.ts'
 const { rgba_images_by_category, maskData, defalt_layer_example } = storeToRefs(userSelection());
 
@@ -153,6 +163,8 @@ const generate_image_id = ref('')
 const form_options = ref(["Size", "Number_Vertical", "Number_Horizontal", "Number_Path"])
 const number_options = form_options.value.slice(1)
 const disabled_form_options = ref<string[]>([])
+
+const dragIndex = ref<number>()
 
 const categorical_options = computed(() => {
     let cat_options = []
@@ -205,7 +217,7 @@ const uploadDefaultLayer = () => {
     generate_numerical_element(data).then(response => {
         defalt_layer_example.value = response.defalt_layer_forexample.sort((a, b) => {
             // descending order
-            return a.Layer > b.Layer ? -1 : 1
+            return a.Position > b.Position ? -1 : 1
         })
 
         defaultLayerUploading.value = false
@@ -235,6 +247,7 @@ const uploadPreview = () => {
             Class: defalt_layer_example.value[i].Class,
             outlier_id: defalt_layer_example.value[i].outlier_id,
             Layer: defalt_layer_example.value[i].Layer,
+            Position: defalt_layer_example.value[i].Position,
             mask_bool: defalt_layer_example.value[i].mask_bool,
         }
 
@@ -270,11 +283,89 @@ const uploadPreview = () => {
     })
 }
 
+const dragstart = (index) => {
+    dragIndex.value = index
+}
+
+const dragover = (event) => {
+    event.preventDefault();
+}
+
+const dragenter = (event, index) => {
+    event.preventDefault();
+
+    if (dragIndex.value !== index) {
+        let source = defalt_layer_example.value[dragIndex.value];
+        defalt_layer_example.value.splice(dragIndex.value, 1);
+        defalt_layer_example.value.splice(index, 0, source);
+        dragIndex.value = index;
+    }
+
+    for (let i = 0; i < defalt_layer_example.value.length; i++) {
+        defalt_layer_example.value[i].Position = defalt_layer_example.value.length - i
+    }
+}
+
+const reSort = () => {
+    defalt_layer_example.value.sort((a, b) => {
+        return a.Layer > b.Layer ? -1 : 1
+    })
+
+    for (let i = 0; i < defalt_layer_example.value.length; i++) {
+        defalt_layer_example.value[i].Position = defalt_layer_example.value.length - i
+    }
+}
+
 const uploadGeneration = () => {
-    console.log(defalt_layer_example.value);
-    console.log(defalt_layer_example.value);
+
+    let rgba_element_adjusted = []
+    for (let i = 0; i < defalt_layer_example.value.length; i++) {
+        let temp = {
+            Colname: defalt_layer_example.value[i].Colname,
+            widget: defalt_layer_example.value[i].Widget,
+            Refine_num: defalt_layer_example.value[i].Refine_num,
+            Class: defalt_layer_example.value[i].Class,
+            outlier_id: defalt_layer_example.value[i].outlier_id,
+            Layer: defalt_layer_example.value[i].Layer,
+            Position: defalt_layer_example.value[i].Position,
+            mask_bool: defalt_layer_example.value[i].mask_bool,
+        }
+
+        if (temp.Class === "Numerical") {
+            temp["Form"] = form_selection.value[i] || "Size"
+            temp["Gap"] = Number(gap_input.value[i]) || 20
+        } else {
+            temp["Form"] = null
+            temp["Gap"] = null
+        }
+
+        if (temp.Form === "Number_Path") {
+            temp["Path_Col"] = categorical_options.value[i]
+        } else {
+            temp["Path_Col"] = null
+        }
+        rgba_element_adjusted.push(temp)
+    }
+
+    let data = {
+        result: rgba_images_by_category.value,
+        dic_array: rgba_element_adjusted,
+        image_id: maskData.value[0].image_id
+    }
+
+    console.log(maskData.value);
+    // console.log(defalt_layer_example.value);
     
-    topGenerateUploading.value = !topGenerateUploading.value
+
+    // topGenerateUploading.value = true
+    // final_submission(data).then(response => {
+    //     console.log(response);
+
+    //     topGenerateUploading.value = false
+    // }).catch(error => {
+    //     topGenerateUploading.value = false
+    //     console.log(error)
+    // })
 }
 
 watch(() => [...form_selection.value], (newValue, _) => {
@@ -290,7 +381,7 @@ watch(() => [...form_selection.value], (newValue, _) => {
 
 <style scoped>
 .select-xs {
-  height: 1rem;
-  min-height: 1rem;
+    height: 1rem;
+    min-height: 1rem;
 }
 </style>

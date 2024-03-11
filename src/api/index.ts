@@ -8,6 +8,7 @@ enum API {
   REGENERATE = '/regenerate',
   GENERATE_NUMERICAL_ELEMENT = '/generate_numerical_element',
   GENERATE_EXAMPLE = '/generate_example',
+  FINAL_SUBMISSION = '/final_generation',
 }
 
 // --------- upload ---------
@@ -133,6 +134,7 @@ interface outlier_element {
   Class: string // ( "Categorical"/"Numerical" )
   outlier_id: string,
   Layer: number,
+  Position: number,
   mask_bool: Array<any>
 }
 
@@ -155,6 +157,7 @@ interface outlier_element_adjusted {
   Class: string, // ( "Categorical"/"Numerical" )
   outlier_id: string,
   Layer: number,
+  Position: number,
   Form: string, // 'Size' / 'Number_Vertical', 'Number_Horizontal', 'Number_Path', None,
   Gap: number // ,None,
   mask_bool: Array<any>,
@@ -171,6 +174,38 @@ interface generate_example_response {
 }
 export const generate_example = (data: generate_example_request) =>
   request.post<any, generate_example_response>(API.GENERATE_EXAMPLE, data, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
+  })
+
+// --------- final_submission ---------
+interface rgba_element_adjusted {
+  Colname: string,
+  widget: widget_form,
+  Refine_num: number,
+  Class: string, // ( "Categorical"/"Numerical" )
+  rgba_id: string,
+  Layer: number,
+  Position: number,
+  Form: string, // 'Size' / 'Number_Vertical', 'Number_Horizontal', 'Number_Path', None,
+  Gap: number // ,None,
+  mask_bool: Array<any>,
+  Path_Col: string
+}
+
+interface final_submission_request {
+  result: any, // rgba_images_by_category
+  dic_array: Array<rgba_element_adjusted>,
+  image_id: string
+}
+
+interface final_submission_response {
+  data_index: any
+}
+
+export const final_submission = (data: final_submission_request) =>
+  request.post<any, final_submission_response>(API.FINAL_SUBMISSION, data, {
     headers: {
       'Access-Control-Allow-Origin': '*',
     },

@@ -30,20 +30,18 @@
                         class="input input-bordered input-sm input-ghost w-full mr-2" />
                     <button class="btn btn-sm btn-ghost btn-outline w-12 text-dark-green" @click="uploadSearch">
                         <span v-if="uploading" class="loading loading-dots loading-lg text-dark-green"></span>
-                        <svg v-else t="1708698132917" class="icon" viewBox="0 0 1024 1024" version="1.1"
-                            xmlns="http://www.w3.org/2000/svg" p-id="8193" id="mx_n_1708698132917">
+                        <svg v-else t="1710077011348" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                            xmlns="http://www.w3.org/2000/svg" p-id="4277">
                             <path
-                                d="M511.20898437 709.75390625c-16.96289063 0-30.76171875-13.79882813-30.76171874-30.76171875V223.27929687L427.625 276.1015625c-12.04101563 12.04101563-31.46484375 12.04101563-43.50585938 0-12.04101563-12.04101563-12.04101563-31.46484375 0-43.50585938L489.41210937 127.30273437c12.04101563-12.04101563 31.46484375-12.04101563 43.50585938 1e-8l105.29296875 105.29296875c12.04101563 12.04101563 12.04101563 31.46484375 0 43.50585937-12.04101563 12.04101563-31.46484375 12.04101563-43.50585938 0L541.8828125 223.27929687V678.9921875c0.08789063 17.05078125-13.7109375 30.76171875-30.67382813 30.76171875z"
-                                p-id="8194" fill="#274E13"></path>
-                            <path
-                                d="M831.48242188 876.13085938H194.890625c-25.48828125 0-46.14257813-20.7421875-46.14257813-46.14257813V508.04492187c0-25.48828125 20.7421875-46.14257813 46.14257813-46.14257812h148.44726563c19.42382813 0 35.15625 15.73242188 35.15624999 35.15625s-15.73242188 35.15625-35.15625 35.15625H219.06054687v273.60351563H807.3125V532.21484375H680.83789063c-19.42382813 0-35.15625-15.73242188-35.15625001-35.15625s15.73242188-35.15625 35.15625-35.15625h150.55664063c25.48828125 0 46.14257813 20.7421875 46.14257813 46.14257813v321.94335937c0.08789063 25.48828125-20.65429688 46.14257813-46.0546875 46.14257813z m-1e-8-343.91601563z"
-                                p-id="8195" fill="#274E13"></path>
+                                d="M416 32c212.064 0 384 171.936 384 384 0 86.4-28.544 166.176-76.736 230.368l254.304 254.304-90.528 90.496-256.576-256.608A382.208 382.208 0 0 1 416 800C203.936 800 32 628.064 32 416S203.936 32 416 32z m0 128a256 256 0 1 0 0 512 256 256 0 0 0 0-512z"
+                                fill="#274E13" p-id="4278"></path>
                         </svg>
                     </button>
                 </div>
                 <div class="w-full h-4/5 flex-none">
-                    <vue-word-cloud font-family="Sans" font-weight="bold" font-variant="normal" :spacing=word_cloud_spacing
-                        :words=word_cloud_data :color="() => get_random_color()" @click="handle_click($event)"/>
+                    <vue-word-cloud font-family="Sans" font-weight="bold" font-variant="normal"
+                        :spacing=word_cloud_spacing :words=word_cloud_data :color="() => get_random_color()"
+                        @click="handle_click($event)" />
                 </div>
             </div>
         </div>
@@ -71,8 +69,8 @@ const uploading = ref(false)
 const word_cloud_spacing = ref(1)
 const word_cloud_data = ref()
 
-const tableHeader =ref<HTMLElement | null | undefined>(null)
-const tableBody =ref<HTMLElement | null | undefined>(null)
+const tableHeader = ref<HTMLElement | null | undefined>(null)
+const tableBody = ref<HTMLElement | null | undefined>(null)
 
 const createDataElement = (htmlTag, innerText, idParent) => {
     let node = document.createElement(htmlTag);
@@ -140,7 +138,7 @@ const handleFileUpload = async () => {
 
             upload_post(formData).then(response => {
                 console.log(response);
-                
+
                 Categorical.value = response.Categorical
                 Numerical.value = response.Numerical
                 word_cloud_data.value = response.Wordcloud;
