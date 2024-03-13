@@ -224,13 +224,13 @@
                 </button>
             </div>
 
-            <div id="vegaEmbedding"></div>
+            <div id="viz"></div>
         </div>
     </BaseFrame>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, version } from "vue"
+import { ref, computed } from "vue"
 import { storeToRefs } from 'pinia'
 import embed from 'vega-embed';
 
@@ -343,6 +343,7 @@ const placement_group_2 = computed(() => {
 })
 
 const finalSubmission = () => {
+
     let submission_data = {
         Colname: selected_attributes.value,
         type: selected_suggestion.value,
@@ -362,12 +363,14 @@ const finalSubmission = () => {
     uploading.value = true
     final_placement(data).then(response => {
         vegaSpec.value = response.vega_lite_dic;
-        vegaSpec.value.data = userJsonData.value
+        vegaSpec.value.data = {
+            "values": userJsonData.value
+        }
 
-        console.log(vegaSpec.value);
-        console.log(JSON.stringify(vegaSpec.value));
-
-        embed('#vegaEmbedding', vegaSpec.value)
+        let specData = JSON.stringify(vegaSpec.value)
+        specData = JSON.parse(specData)
+        document.getElementById("vegaembedding")?.replaceChildren();
+        embed('#vegaembedding', specData, { renderer: 'svg' })
 
         showVegaEmbedding.value = true
         uploading.value = false

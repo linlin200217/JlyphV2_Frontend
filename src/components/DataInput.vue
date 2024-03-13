@@ -113,7 +113,7 @@ const handleFileUpload = async () => {
                 let content = event.target.result
                 userJsonData.value = d3.csvParse(content)
                 userJsonData.value.forEach((element, index) => {
-                    element["id"] = String(index + 1)
+                    element["id"] = index + 1
                     element["img"] = ""
                 });
                 userJsonData.value.columns.push("id", "img")

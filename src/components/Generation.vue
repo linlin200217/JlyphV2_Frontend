@@ -138,18 +138,18 @@
             </div>
 
             <!-- vega lite embedding -->
-            <div id="vegaEmbedding-1" class="absolute inset-0 bg-white" v-show="showVegaEmbedding">
-                <div class="absolute top-1 right-1 h-8 w-8" @click="closeVegaEmbedding">
-                    <button class="btn btn-circle btn-sm btn-ghost btn-outline text-dark-green">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h- w-6" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
+            <div v-show="showVegaEmbedding" class="absolute top-0 left-0 inset-0 h-full w-full">
+                <div id="vegaembedding" class="bg-white h-full w-full"></div>
             </div>
-
+            <div class="absolute bottom-1 right-1 h-8 w-8" v-show="showVegaEmbedding" @click="closeVegaEmbedding">
+                <button class="btn btn-circle btn-sm btn-ghost btn-outline text-dark-green">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h- w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
         </div>
     </BaseFrame>
 </template>

@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen w-screen flex flex-row flex-nowrap">
+  <div class="h-screen w-screen max-h-screen max-w-screen flex flex-row flex-nowrap">
     <div class="h-full w-1/4 flex flex-col flex-nowrap">
       <div class="w-full h-2/5 p-4">
         <DataInput />

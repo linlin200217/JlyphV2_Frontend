@@ -257,5 +257,5 @@ export const final_placement = (data: final_placement_request) =>
 
 // --------- image ---------
 export const get_image_url = (image_id: string) => {
-  return import.meta.env.VITE_BASE_URL + '/image/' + image_id
+  return import.meta.env.VITE_BASE_URL + '/image/' + image_id + '.png'
 }
