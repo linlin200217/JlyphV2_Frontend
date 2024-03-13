@@ -51,6 +51,7 @@
 <script setup lang="ts">
 import { ref } from "vue"
 import { storeToRefs } from 'pinia'
+import * as d3 from "d3"
 import * as papa from "papaparse"
 import VueWordCloud from 'vuewordcloud'
 
@@ -60,11 +61,11 @@ import BaseFrame from "./BaseFrame.vue";
 import { upload_post } from '@/api/index.ts'
 import { userSelection } from '@/store/modules/userSelection.ts'
 
-const { Categorical, Numerical, userPrompt } = storeToRefs(userSelection());
+const { userJsonData, dataAttributes, Categorical, Numerical, userPrompt } = storeToRefs(userSelection());
 
 const form = ref(null)
 const file = ref(null)
-const userSearch = ref("")
+const userSearch = ref<string | null>()
 const uploading = ref(false)
 const word_cloud_spacing = ref(1)
 const word_cloud_data = ref()
@@ -110,6 +111,12 @@ const handleFileUpload = async () => {
             const reader = new FileReader();
             reader.onload = event => {
                 let content = event.target.result
+                userJsonData.value = d3.csvParse(content)
+                userJsonData.value.forEach((element, index) => {
+                    element["id"] = String(index + 1)
+                    element["img"] = ""
+                });
+                userJsonData.value.columns.push("id", "img")
                 try {
                     tableHeader.value?.replaceChildren();
                     tableBody.value?.replaceChildren();
@@ -120,6 +127,7 @@ const handleFileUpload = async () => {
                                 if (i === 0) {
                                     for (let j = 0; j < results.data[i].length; j++) {
                                         createHeaderElement(results.data[i][j]);
+                                        dataAttributes.value.push(results.data[i][j]);
                                     }
                                 }
                                 if (i > 0) {
@@ -156,7 +164,9 @@ const get_random_color = () => {
 }
 
 const handle_click = (event) => {
+    userSearch.value = null
     userSearch.value = event.target.textContent;
+    userPrompt.value = null
     userPrompt.value = event.target.textContent;
 }
 

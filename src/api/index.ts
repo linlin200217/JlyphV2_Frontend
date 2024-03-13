@@ -9,6 +9,8 @@ enum API {
   GENERATE_NUMERICAL_ELEMENT = '/generate_numerical_element',
   GENERATE_EXAMPLE = '/generate_example',
   FINAL_SUBMISSION = '/final_generation',
+  SUGGESTION = '/visualisation_suggestion',
+  FINAL_PLACEMENT = '/final_placement'
 }
 
 // --------- upload ---------
@@ -201,11 +203,53 @@ interface final_submission_request {
 }
 
 interface final_submission_response {
-  data_index: any
+  final_generation_result: any
 }
 
 export const final_submission = (data: final_submission_request) =>
   request.post<any, final_submission_response>(API.FINAL_SUBMISSION, data, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
+  })
+
+// --------- visualization_suggestion ---------
+interface visualization_suggestion_request {
+  chosen_list: Array<string>
+}
+
+interface visualization_suggestion_response {
+  Suggestion: Array<string>
+}
+
+export const visualization_suggestion = (data: visualization_suggestion_request) =>
+  request.post<any, visualization_suggestion_response>(API.SUGGESTION, data, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
+  })
+
+// --------- final_placement ---------
+interface final_placement_request {
+  dic: {
+    Colname: Array<string>, // chosen_list
+    type: string,
+    image_size: number, // 100
+    background_color: string, // Null
+    view_color: string, // Null
+    stroke_color: string, // Null
+    strokeWidth: number, // 2
+    width_gap: number, // 50
+    height_gap: number, // 50
+  }
+}
+
+interface final_placement_response {
+  vega_lite_dic: any
+}
+
+export const final_placement = (data: final_placement_request) =>
+  request.post<any, final_placement_response>(API.FINAL_PLACEMENT, data, {
     headers: {
       'Access-Control-Allow-Origin': '*',
     },

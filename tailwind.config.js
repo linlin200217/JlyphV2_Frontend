@@ -17,6 +17,7 @@ export default {
       colors: {
         'dark-green': '#274E13',
         'light-green': '#97AB8A',
+        'chat-background': '#B6D7A8'
       },
       boxShadow: {
         '3xl': '15px 15px 12px 1px rgba(39,78,19,0.6)',

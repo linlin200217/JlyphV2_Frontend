@@ -1,6 +1,6 @@
 <template>
     <BaseFrame>
-        <div class="h-full w-full flex flex-col flex-nowrap">
+        <div class="h-full w-full flex flex-col flex-nowrap relative">
             <!-- top bar -->
             <div class="w-full h-[5%] py-1 px-2 mb-1 flex flex-row flex-nowrap justify-between">
                 <Icon icon_path="/src/assets/Generation.png"></Icon>
@@ -64,11 +64,11 @@
 
                         <div class="flex justify-evenly my-1">
                             <button class="btn btn-sm btn-ghost btn-outline min-w-4 text-dark-green" @click="reSort">
-                                <svg t="1710095584302" class="icon h-6" viewBox="0 0 1024 1024" version="1.1"
-                                    xmlns="http://www.w3.org/2000/svg" p-id="5938">
+                                <svg t="1710310954977" class="icon h-6" viewBox="0 0 1024 1024" version="1.1"
+                                    xmlns="http://www.w3.org/2000/svg" p-id="5118">
                                     <path
-                                        d="M482.962286 492.032l-51.687619 51.736381-196.559238-196.437333 196.510476-196.608 51.736381 51.687619-99.230476 99.279238h223.329523c140.434286 0 254.659048 111.957333 258.364953 251.465143l0.097524 6.997333c0 142.726095-115.712 258.438095-258.438096 258.438095H154.819048v-73.142857H607.085714a185.295238 185.295238 0 1 0 0-370.590476l-241.371428-0.024381 117.248 117.199238z"
-                                        p-id="5939" fill="#274E13" fill-opacity="1"></path>
+                                        d="M407.568 154.019c-11.952-11.925-26.904-17.894-41.853-17.894-5.972 0-11.952 2.984-17.929 2.984h-2.992c-8.964 5.961-14.94 11.941-20.921 17.902L81.77 398.634c-23.912 23.862-23.912 59.669 0 80.551 11.956 11.929 26.901 17.894 41.841 17.894 14.948 0 29.896-5.965 41.845-17.894l146.459-146.177v495.198c0 32.815 26.908 56.677 56.797 56.677 29.892 0 56.789-26.854 56.789-56.677V198.775c-0.001-14.925-5.973-32.819-17.933-44.756zM942.59 541.831c-11.956-11.941-26.904-17.905-41.849-17.905-14.944 0-29.889 5.965-41.845 17.905L709.45 690.977V195.791c0-32.819-26.901-56.681-56.785-56.681-29.892 0-56.797 26.85-56.797 56.681v635.391c0 32.811 26.904 56.693 56.797 56.693 14.944 0 29.885-5.98 41.841-17.905l245.097-244.615c26.896-23.859 26.896-59.658 2.987-83.524z"
+                                        fill="#274E13" p-id="5119"></path>
                                 </svg>
                             </button>
 
@@ -136,6 +136,20 @@
                     </button>
                 </div>
             </div>
+
+            <!-- vega lite embedding -->
+            <div id="vegaEmbedding-1" class="absolute inset-0 bg-white" v-show="showVegaEmbedding">
+                <div class="absolute top-1 right-1 h-8 w-8" @click="closeVegaEmbedding">
+                    <button class="btn btn-circle btn-sm btn-ghost btn-outline text-dark-green">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h- w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
         </div>
     </BaseFrame>
 </template>
@@ -150,7 +164,7 @@ import ElementSingle from "./Element-single.vue";
 
 import { get_image_url, generate_numerical_element, generate_example, final_submission } from '@/api/index.ts'
 import { userSelection } from '@/store/modules/userSelection.ts'
-const { rgba_images_by_category, maskData, defalt_layer_example } = storeToRefs(userSelection());
+const { rgba_images_by_category, maskData, defalt_layer_example, generated_final_images, generated_cartoon_images, startChatting, showVegaEmbedding } = storeToRefs(userSelection());
 
 const defaultLayerUploading = ref(false)
 const leftPreviewUploading = ref(false)
@@ -319,32 +333,64 @@ const reSort = () => {
 const uploadGeneration = () => {
 
     let rgba_element_adjusted = []
-    for (let i = 0; i < defalt_layer_example.value.length; i++) {
-        let temp = {
-            Colname: defalt_layer_example.value[i].Colname,
-            widget: defalt_layer_example.value[i].Widget,
-            Refine_num: defalt_layer_example.value[i].Refine_num,
-            Class: defalt_layer_example.value[i].Class,
-            outlier_id: defalt_layer_example.value[i].outlier_id,
-            Layer: defalt_layer_example.value[i].Layer,
-            Position: defalt_layer_example.value[i].Position,
-            mask_bool: defalt_layer_example.value[i].mask_bool,
-        }
+    for (let i = 0; i < maskData.value.length; i++) {
 
-        if (temp.Class === "Numerical") {
-            temp["Form"] = form_selection.value[i] || "Size"
-            temp["Gap"] = Number(gap_input.value[i]) || 20
-        } else {
+        let mask_data_i = maskData.value[i]
+        if (mask_data_i.categorical) {
+            let temp = {
+                Colname: mask_data_i.categorical,
+                widget: mask_data_i.widget,
+                Refine_num: mask_data_i.mask_refine,
+                Class: "Categorical",
+                rgba_id: null,
+            }
+
+            let layer_example_i = defalt_layer_example.value.find((element) =>
+                element.Colname == mask_data_i.categorical
+            )
+
+            if (!layer_example_i) {
+                layer_example_i = defalt_layer_example.value.find((element) =>
+                    element.Colname === mask_data_i.numerical
+                )
+            }
+
+            temp["Layer"] = layer_example_i.Layer
+            temp["Position"] = layer_example_i.Position
+            temp["mask_bool"] = layer_example_i.mask_bool
             temp["Form"] = null
             temp["Gap"] = null
+            temp["Path_Col"] = null
+
+            rgba_element_adjusted.push(temp)
         }
 
-        if (temp.Form === "Number_Path") {
-            temp["Path_Col"] = categorical_options.value[i]
-        } else {
-            temp["Path_Col"] = null
+        if (mask_data_i.numerical) {
+            let temp = {
+                Colname: mask_data_i.numerical,
+                widget: mask_data_i.widget,
+                Refine_num: mask_data_i.mask_refine,
+                Class: "Numerical",
+                rgba_id: null,
+            }
+
+            let layer_example_i = defalt_layer_example.value.find((element) =>
+                element.Colname == mask_data_i.numerical
+            )
+
+            temp["Layer"] = layer_example_i.Layer
+            temp["Position"] = layer_example_i.Position
+            temp["mask_bool"] = layer_example_i.mask_bool
+
+            temp["Form"] = form_selection.value[i] || "Size"
+            temp["Gap"] = Number(gap_input.value[i]) || 20
+            if (temp.Form === "Number_Path") {
+                temp["Path_Col"] = categorical_options.value[i]
+            } else {
+                temp["Path_Col"] = null
+            }
+            rgba_element_adjusted.push(temp)
         }
-        rgba_element_adjusted.push(temp)
     }
 
     let data = {
@@ -353,19 +399,17 @@ const uploadGeneration = () => {
         image_id: maskData.value[0].image_id
     }
 
-    console.log(maskData.value);
-    // console.log(defalt_layer_example.value);
-    
+    topGenerateUploading.value = true
+    final_submission(data).then(response => {
+        generated_final_images.value = response.final_generation_result[0]
+        generated_cartoon_images.value = response.final_generation_result[1]
 
-    // topGenerateUploading.value = true
-    // final_submission(data).then(response => {
-    //     console.log(response);
-
-    //     topGenerateUploading.value = false
-    // }).catch(error => {
-    //     topGenerateUploading.value = false
-    //     console.log(error)
-    // })
+        startChatting.value = true
+        topGenerateUploading.value = false
+    }).catch(error => {
+        topGenerateUploading.value = false
+        console.log(error)
+    })
 }
 
 watch(() => [...form_selection.value], (newValue, _) => {
@@ -377,6 +421,10 @@ watch(() => [...form_selection.value], (newValue, _) => {
         }
     }
 })
+
+const closeVegaEmbedding = () => {
+    showVegaEmbedding.value = false
+}
 </script>
 
 <style scoped>

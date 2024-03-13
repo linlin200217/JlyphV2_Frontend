@@ -3,10 +3,12 @@ import { ref, computed } from 'vue'
 
 export const userSelection = defineStore('userSelection', () => {
 
+  const userJsonData = ref()
+  const dataAttributes = ref<string[]>([])
   const Categorical = ref()
   const Numerical = ref()
   const selectedImageId = ref('')
-  const userPrompt = ref('')
+  const userPrompt = ref<string | null>()
 
   interface mask_data {
     widget: {
@@ -80,8 +82,15 @@ export const userSelection = defineStore('userSelection', () => {
   const rgba_images_by_category = ref('')
 
   const defalt_layer_example = ref([])
+  const generated_final_images = ref([])
+  const generated_cartoon_images = ref([])
+  const startChatting = ref(false)
+  const showVegaEmbedding = ref(false)
+  const vegaSpec = ref()
 
   return {
+    userJsonData,
+    dataAttributes,
     Categorical,
     Categorical_key,
     Categorical_num,
@@ -96,6 +105,11 @@ export const userSelection = defineStore('userSelection', () => {
     selectedMaskNumber,
     mask_order,
     rgba_images_by_category,
-    defalt_layer_example
+    defalt_layer_example,
+    generated_final_images,
+    generated_cartoon_images,
+    startChatting,
+    showVegaEmbedding,
+    vegaSpec
   }
 })
