@@ -239,8 +239,8 @@ interface final_placement_request {
     view_color: string, // Null
     stroke_color: string, // Null
     strokeWidth: number, // 2
-    width_gap: number, // 50
-    height_gap: number, // 50
+    // width_gap: number, // 50
+    // height_gap: number, // 50
   }
 }
 

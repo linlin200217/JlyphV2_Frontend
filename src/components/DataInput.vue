@@ -121,6 +121,7 @@ const handleFileUpload = async () => {
                     tableHeader.value?.replaceChildren();
                     tableBody.value?.replaceChildren();
 
+                    dataAttributes.value = [];
                     papa.parse(content, {
                         complete: (results) => {
                             for (let i = 0; i < results.data.length; i++) {

@@ -138,7 +138,7 @@
             </div>
 
             <!-- vega lite embedding -->
-            <div v-show="showVegaEmbedding" class="absolute top-0 left-0 inset-0 h-full w-full">
+            <div v-show="showVegaEmbedding" id="vegabox" class="absolute top-0 left-0 inset-0 h-full w-full">
                 <div id="vegaembedding" class="bg-white h-full w-full"></div>
             </div>
             <div class="absolute bottom-1 right-1 h-8 w-8" v-show="showVegaEmbedding" @click="closeVegaEmbedding">
@@ -280,6 +280,7 @@ const uploadPreview = () => {
         }
         example_array_data.push(temp)
     }
+console.log(example_array_data);
 
     let data = {
         dic_array: example_array_data,
@@ -431,5 +432,10 @@ const closeVegaEmbedding = () => {
 .select-xs {
     height: 1rem;
     min-height: 1rem;
+}
+
+#vegaembedding svg {
+    width: 100%;
+    height: 100%;
 }
 </style>

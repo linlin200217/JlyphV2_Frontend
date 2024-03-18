@@ -132,8 +132,8 @@
                             class="inline border-2 border-dashed border-dark-green rounded-full mx-1 px-1 cursor-pointer hover:bg-dark-green hover:text-white">clear</span>
                     </span>
                     <div class="w-full flex justify-around px-1">
-                        <input v-for="color in background_color_list" type="radio" name="background-color-radio"
-                            class="radio radio-xs" :style="{ 'background-color': color }" v-model="backgroundColor" />
+                        <input v-for="color in background_color_list" type="radio" name="background-color-radio" :value="color"
+                            class="radio radio-xs" :style="{ 'background-color': color }" v-model="backgroundColor"/>
                     </div>
                 </div>
 
@@ -143,7 +143,7 @@
                         Color <span @click="clear_view_color()"
                             class="inline border-2 border-dashed border-dark-green rounded-full mx-1 px-1 cursor-pointer hover:bg-dark-green hover:text-white">clear</span></span>
                     <div class="w-full flex justify-around px-1">
-                        <input v-for="color in view_color_list" type="radio" name="background-color-radio"
+                        <input v-for="color in view_color_list" type="radio" name="view-color-radio" :value="color"
                             class="radio radio-xs" :style="{ 'background-color': color }" v-model="viewColor" />
                     </div>
                 </div>
@@ -154,7 +154,7 @@
                         Color <span @click="clear_stroke_color()"
                             class="inline border-2 border-dashed border-dark-green rounded-full mx-1 px-1 cursor-pointer hover:bg-dark-green hover:text-white">clear</span></span>
                     <div class="w-full flex justify-around px-1">
-                        <input v-for="color in stroke_color_list" type="radio" name="background-color-radio"
+                        <input v-for="color in stroke_color_list" type="radio" name="stroke-color-radio" :value="color"
                             class="radio radio-xs" :style="{ 'background-color': color }" v-model="strokeColor" />
                     </div>
                 </div>
@@ -232,7 +232,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue"
 import { storeToRefs } from 'pinia'
-import embed from 'vega-embed';
+import embed, { vega } from 'vega-embed';
 
 import Icon from "./Icon.vue";
 import BaseFrame from "./BaseFrame.vue";
@@ -351,9 +351,7 @@ const finalSubmission = () => {
         background_color: backgroundColor.value,
         view_color: viewColor.value,
         stroke_color: strokeColor.value,
-        strokeWidth: strokeWidth.value,
-        width_gap: widthGap.value,
-        height_gap: heightGap.value,
+        strokeWidth: strokeWidth.value
     }
 
     let data = {
@@ -369,8 +367,26 @@ const finalSubmission = () => {
 
         let specData = JSON.stringify(vegaSpec.value)
         specData = JSON.parse(specData)
-        document.getElementById("vegaembedding")?.replaceChildren();
-        embed('#vegaembedding', specData, { renderer: 'svg' })
+
+        let vega_box = document.getElementById("vegabox")
+        if (vega_box) {
+            let vega_box_info = vega_box.getBoundingClientRect();
+            specData.height = Math.floor(Number(vega_box_info.height) * 0.88)
+            specData.width = Math.floor(Number(vega_box_info.width) * 0.88)
+        }
+        
+        if (selected_suggestion.value === "Multi_Isotype") {
+            let attribute_values = []
+            let target_attribute = selected_attributes.value[0]
+            userJsonData.value.forEach((element) => {
+                attribute_values.push(element[target_attribute])
+            })
+
+        }
+        // console.log(JSON.stringify(specData));
+        
+        // document.getElementById("vegaembedding")?.replaceChildren();
+        // embed('#vegaembedding', specData, { renderer: 'svg' })
 
         showVegaEmbedding.value = true
         uploading.value = false
