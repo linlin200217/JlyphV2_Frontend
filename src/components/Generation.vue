@@ -260,8 +260,8 @@ const uploadPreview = () => {
             Refine_num: defalt_layer_example.value[i].Refine_num,
             Class: defalt_layer_example.value[i].Class,
             outlier_id: defalt_layer_example.value[i].outlier_id,
-            Layer: defalt_layer_example.value[i].Layer,
-            Position: defalt_layer_example.value[i].Position,
+            Layer: defalt_layer_example.value[i].Position,
+            Position: defalt_layer_example.value[i].Layer,
             mask_bool: defalt_layer_example.value[i].mask_bool,
         }
 

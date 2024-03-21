@@ -132,8 +132,9 @@
                             class="inline border-2 border-dashed border-dark-green rounded-full mx-1 px-1 cursor-pointer hover:bg-dark-green hover:text-white">clear</span>
                     </span>
                     <div class="w-full flex justify-around px-1">
-                        <input v-for="color in background_color_list" type="radio" name="background-color-radio" :value="color"
-                            class="radio radio-xs" :style="{ 'background-color': color }" v-model="backgroundColor"/>
+                        <input v-for="color in background_color_list" type="radio" name="background-color-radio"
+                            :value="color" class="radio radio-xs" :style="{ 'background-color': color }"
+                            v-model="backgroundColor" />
                     </div>
                 </div>
 
@@ -306,6 +307,7 @@ const selectAttributes = (item) => {
 }
 
 const confirm_attributes = () => {
+    selected_attributes.value = [...new Set(selected_attributes.value)]
     get_visualization_suggestion(selected_attributes.value);
 }
 
@@ -374,19 +376,24 @@ const finalSubmission = () => {
             specData.height = Math.floor(Number(vega_box_info.height) * 0.88)
             specData.width = Math.floor(Number(vega_box_info.width) * 0.88)
         }
-        
+
         if (selected_suggestion.value === "Multi_Isotype") {
             let attribute_values = []
             let target_attribute = selected_attributes.value[0]
+
             userJsonData.value.forEach((element) => {
                 attribute_values.push(element[target_attribute])
             })
+            attribute_values = [...new Set(attribute_values)];
 
+            if (attribute_values.length != 0) {
+                specData.height = Math.floor(specData.height / attribute_values.length)
+            }
         }
-        // console.log(JSON.stringify(specData));
-        
-        // document.getElementById("vegaembedding")?.replaceChildren();
-        // embed('#vegaembedding', specData, { renderer: 'svg' })
+        console.log(JSON.stringify(specData));
+
+        document.getElementById("vegaembedding")?.replaceChildren();
+        embed('#vegaembedding', specData, { renderer: 'svg' })
 
         showVegaEmbedding.value = true
         uploading.value = false
