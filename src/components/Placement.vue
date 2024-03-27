@@ -233,7 +233,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue"
 import { storeToRefs } from 'pinia'
-import embed, { vega } from 'vega-embed';
+import embed from 'vega-embed';
 
 import Icon from "./Icon.vue";
 import BaseFrame from "./BaseFrame.vue";
@@ -362,19 +362,23 @@ const finalSubmission = () => {
 
     uploading.value = true
     final_placement(data).then(response => {
+        showVegaEmbedding.value = true
+
         vegaSpec.value = response.vega_lite_dic;
         vegaSpec.value.data = {
             "values": userJsonData.value
         }
-
         let specData = JSON.stringify(vegaSpec.value)
         specData = JSON.parse(specData)
 
         let vega_box = document.getElementById("vegabox")
-        if (vega_box) {
+        if (vega_box?.style.display != "none") {
             let vega_box_info = vega_box.getBoundingClientRect();
             specData.height = Math.floor(Number(vega_box_info.height) * 0.88)
             specData.width = Math.floor(Number(vega_box_info.width) * 0.88)
+        } else {
+            specData.height = 700
+            specData.width = 800
         }
 
         if (selected_suggestion.value === "Multi_Isotype") {
@@ -390,12 +394,10 @@ const finalSubmission = () => {
                 specData.height = Math.floor(specData.height / attribute_values.length)
             }
         }
-        console.log(JSON.stringify(specData));
 
         document.getElementById("vegaembedding")?.replaceChildren();
         embed('#vegaembedding', specData, { renderer: 'svg' })
 
-        showVegaEmbedding.value = true
         uploading.value = false
     }).catch(error => {
         uploading.value = false

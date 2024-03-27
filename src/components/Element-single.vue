@@ -25,7 +25,6 @@
 
 <script setup lang="ts">
 import { ref } from "vue"
-
 import { regenerate_post, get_image_url } from '@/api/index.ts'
 
 const props = defineProps(['slot_data', 'mask_data'])

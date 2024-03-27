@@ -46,9 +46,9 @@ import Icon from "./Icon.vue";
 import BaseFrame from "./BaseFrame.vue";
 import MaskSingle from "./Mask-single.vue";
 
-import { generate_element_post } from '@/api/index.ts'
+import { generate_element_post, generate_numerical_element } from '@/api/index.ts'
 import { userSelection } from '@/store/modules/userSelection.ts'
-const { userPrompt, maskData, selectedMaskNumber, mask_order, Categorical_key, Categorical_num, Cat_selected, Numerical_key, Numerical_num, Num_selected, rgba_images_by_category } = storeToRefs(userSelection());
+const { userPrompt, maskData, selectedMaskNumber, mask_order, Categorical_key, Categorical_num, Cat_selected, Numerical_key, Numerical_num, Num_selected, rgba_images_by_category, defalt_layer_example } = storeToRefs(userSelection());
 
 const uploading = ref(false);
 
@@ -110,7 +110,7 @@ const uploadMasks = () => {
                 }
                 return obj;
             }, {});
-            
+
             rgba_images_by_category.value = sorted_rgba_images;
 
             uploading.value = false
@@ -118,8 +118,26 @@ const uploadMasks = () => {
             console.log(error)
             uploading.value = false
         })
+
+        //  ------------- uploadDefaultLayer -------------------
+        let numerical_data = {
+            mask_forall: mask_forall_data,
+            chosen_image_id: maskData.value[0].image_id,
+        }
+        
+        generate_numerical_element(numerical_data).then(response => {
+            defalt_layer_example.value = response.defalt_layer_forexample.sort((a, b) => {
+                // descending order
+                return a.Position > b.Position ? -1 : 1
+            })
+            uploading.value = false
+        }).catch(error => {
+            console.log(error)
+            uploading.value = false
+        })
     }
 }
+
 </script>
 
 <style scoped></style>

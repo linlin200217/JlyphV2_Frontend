@@ -6,7 +6,7 @@
                 <Icon icon_path="/src/assets/Generation.png"></Icon>
                 <button class="btn btn-sm btn-ghost btn-outline min-w-20 text-dark-green" @click="uploadGeneration">
                     <span v-if="topGenerateUploading" class="loading loading-dots loading-md text-dark-green"></span>
-                    <svg v-else t="1708698132917" class="icon h-6" viewBox="0 0 1024 1024" version="1.1"
+                    <svg v-if="false" t="1708698132917" class="icon h-6" viewBox="0 0 1024 1024" version="1.1"
                         xmlns="http://www.w3.org/2000/svg" p-id="8193" id="mx_n_1708698132917">
                         <path
                             d="M511.20898437 709.75390625c-16.96289063 0-30.76171875-13.79882813-30.76171874-30.76171875V223.27929687L427.625 276.1015625c-12.04101563 12.04101563-31.46484375 12.04101563-43.50585938 0-12.04101563-12.04101563-12.04101563-31.46484375 0-43.50585938L489.41210937 127.30273437c12.04101563-12.04101563 31.46484375-12.04101563 43.50585938 1e-8l105.29296875 105.29296875c12.04101563 12.04101563 12.04101563 31.46484375 0 43.50585937-12.04101563 12.04101563-31.46484375 12.04101563-43.50585938 0L541.8828125 223.27929687V678.9921875c0.08789063 17.05078125-13.7109375 30.76171875-30.67382813 30.76171875z"
@@ -15,12 +15,34 @@
                             d="M831.48242188 876.13085938H194.890625c-25.48828125 0-46.14257813-20.7421875-46.14257813-46.14257813V508.04492187c0-25.48828125 20.7421875-46.14257813 46.14257813-46.14257812h148.44726563c19.42382813 0 35.15625 15.73242188 35.15624999 35.15625s-15.73242188 35.15625-35.15625 35.15625H219.06054687v273.60351563H807.3125V532.21484375H680.83789063c-19.42382813 0-35.15625-15.73242188-35.15625001-35.15625s15.73242188-35.15625 35.15625-35.15625h150.55664063c25.48828125 0 46.14257813 20.7421875 46.14257813 46.14257813v321.94335937c0.08789063 25.48828125-20.65429688 46.14257813-46.0546875 46.14257813z m-1e-8-343.91601563z"
                             p-id="8195" fill="#274E13"></path>
                     </svg>
-                    <span class="text-dark-green">Submit</span>
+                    <span class="text-dark-green">Glyph Generation</span>
                 </button>
             </div>
 
             <div class="w-full h-[95%] flex flex-row flex-nowrap py-1 relative">
-                <div class="h-full w-1/3 flex flex-col flex-nowrap justify-start">
+
+                <!-- left part -->
+                <div class=" w-2/3 overflow-y-scroll mr-3">
+                    <div v-for="(items, key, rgba_index) in rgba_images_by_category"
+                        class="h-40 w-full flex flex-row flex-nowrap overflow-scroll">
+                        <div class="h-full w-20 flex flex-col flex-nowrap">
+                            <div class="text-sm font-bold text-center text-dark-green text-wrap capitalize">
+                                {{ key }}
+                            </div>
+                            <div v-if="maskData[rgba_index].categorical"
+                                class="text-xs px-2 mt-1 mx-auto text-center text-wrap capitalize text-light-green border border-light-green rounded-2xl flex">
+                                categorical</div>
+                            <div v-if="maskData[rgba_index].numerical"
+                                class="text-xs px-2 mt-1 mx-auto text-center text-wrap capitalize text-light-green border border-light-green rounded-2xl flex">
+                                numerical</div>
+                        </div>
+                        <ElementSingle v-for="(item, _) in items" :slot_data="item" :mask_data="maskData[rgba_index]">
+                        </ElementSingle>
+                    </div>
+                </div>
+
+                <!-- right part -->
+                <div class="h-full w-1/3 flex flex-col flex-nowrap justify-start mr-1">
                     <div
                         class="w-full h-fit flex flex-col flex-nowrap justify-start shadow-lg shadow-dark-green bg-white box-border border-2 border-dark-green border-dashed rounded-lg p-1">
                         <!-- defalt_layer_example -->
@@ -37,24 +59,26 @@
                             <div class="h-full w-1/3 flex flex-col flex-nowrap justify-center">
                                 <div
                                     class="px-2 mx-auto text-center text-xs text-wrap capitalize rounded-2xl bg-light-green flex">
-                                    <span class="m-auto text-black">{{ item.Class }}</span>
+                                    <span class="m-auto text-black">{{ item.Colname }}</span>
                                 </div>
                                 <div v-show="showInputBar(item.Class)"
                                     class="flex flex-col flex-nowrap justify-center items-center">
                                     <div class="join h-4">
-                                        <input type="text" v-model="gap_input[index]" placeholder="Gap"
+                                        <input type="text" v-model="gap_input[getIndexByColname(item.Colname)]"
+                                            placeholder="Gap"
                                             class="input input-bordered input-xs input-ghost h-4 w-1/2 join-item" />
                                         <select
                                             class="select select-bordered select-ghost select-xs h-4 w-1/2 join-item"
-                                            v-model="form_selection[index]">
+                                            v-model="form_selection[getIndexByColname(item.Colname)]">
                                             <option v-for="item in form_options" :value="item"
                                                 :disabled="disabled_form_options.includes(item)">{{ item }}</option>
                                         </select>
                                     </div>
                                     <div class="w-full h-4 flex justify-center items-center">
-                                        <select v-show="form_selection[index] === 'Number_Path'"
+                                        <select
+                                            v-show="form_selection[getIndexByColname(item.Colname)] === 'Number_Path'"
                                             class="select select-bordered select-ghost select-xs h-4 w-3/4"
-                                            v-model="path_col[index]">
+                                            v-model="path_col[getIndexByColname(item.Colname)]">
                                             <option v-for="col in categorical_options" :value="col">{{ col }}</option>
                                         </select>
                                     </div>
@@ -86,8 +110,9 @@
                                 @click="uploadPreview">
                                 <span v-if="leftPreviewUploading"
                                     class="loading loading-dots loading-md text-dark-green"></span>
-                                <svg v-else t="1708698132917" class="icon h-6" viewBox="0 0 1024 1024" version="1.1"
-                                    xmlns="http://www.w3.org/2000/svg" p-id="8193" id="mx_n_1708698132917">
+                                <svg v-if="false" t="1708698132917" class="icon h-6" viewBox="0 0 1024 1024"
+                                    version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="8193"
+                                    id="mx_n_1708698132917">
                                     <path
                                         d="M511.20898437 709.75390625c-16.96289063 0-30.76171875-13.79882813-30.76171874-30.76171875V223.27929687L427.625 276.1015625c-12.04101563 12.04101563-31.46484375 12.04101563-43.50585938 0-12.04101563-12.04101563-12.04101563-31.46484375 0-43.50585938L489.41210937 127.30273437c12.04101563-12.04101563 31.46484375-12.04101563 43.50585938 1e-8l105.29296875 105.29296875c12.04101563 12.04101563 12.04101563 31.46484375 0 43.50585937-12.04101563 12.04101563-31.46484375 12.04101563-43.50585938 0L541.8828125 223.27929687V678.9921875c0.08789063 17.05078125-13.7109375 30.76171875-30.67382813 30.76171875z"
                                         p-id="8194" fill="#274E13"></path>
@@ -105,20 +130,8 @@
                     </div>
                 </div>
 
-                <!-- right part -->
-                <div class=" w-2/3 overflow-y-scroll">
-                    <div v-for="(items, key, rgba_index) in rgba_images_by_category"
-                        class="h-48 w-full flex flex-row flex-nowrap overflow-scroll">
-                        <div class="h-full w-[100px] font-bold text-center text-dark-green text-wrap capitalize">{{ key
-                            }}
-                        </div>
-                        <ElementSingle v-for="(item, _) in items" :slot_data="item" :mask_data="maskData[rgba_index]">
-                        </ElementSingle>
-                    </div>
-                </div>
-
                 <!-- absolute button -->
-                <div class="absolute bottom-2 right-2">
+                <!-- <div class="absolute bottom-2 right-2">
                     <button class="btn btn-sm btn-ghost btn-outline min-w-20 text-dark-green"
                         @click="uploadDefaultLayer">
                         <span v-if="defaultLayerUploading"
@@ -134,7 +147,7 @@
                         </svg>
                         <span class="text-dark-green">Submit</span>
                     </button>
-                </div>
+                </div> -->
             </div>
 
             <!-- vega lite embedding -->
@@ -162,11 +175,11 @@ import Icon from "./Icon.vue";
 import BaseFrame from "./BaseFrame.vue";
 import ElementSingle from "./Element-single.vue";
 
-import { get_image_url, generate_numerical_element, generate_example, final_submission } from '@/api/index.ts'
+import { get_image_url, generate_example, final_submission } from '@/api/index.ts'
 import { userSelection } from '@/store/modules/userSelection.ts'
 const { rgba_images_by_category, maskData, defalt_layer_example, generated_final_images, generated_cartoon_images, startChatting, showVegaEmbedding } = storeToRefs(userSelection());
 
-const defaultLayerUploading = ref(false)
+// const defaultLayerUploading = ref(false)
 const leftPreviewUploading = ref(false)
 const topGenerateUploading = ref(false)
 const form_selection = ref<string[]>([])
@@ -191,55 +204,55 @@ const categorical_options = computed(() => {
     return cat_options
 })
 
-const uploadDefaultLayer = () => {
-    let mask_forall_data = []
-    for (let i = 0; i < maskData.value.length; i++) {
-        let item = maskData.value[i];
-        if (!item.categorical && !item.numerical) {
-            alert(`Attribute for mask ${i} not selected!`)
-            defaultLayerUploading.value = false
-            return
-        }
+// const uploadDefaultLayer = () => {
+//     let mask_forall_data = []
+//     for (let i = 0; i < maskData.value.length; i++) {
+//         let item = maskData.value[i];
+//         if (!item.categorical && !item.numerical) {
+//             alert(`Attribute for mask ${i} not selected!`)
+//             defaultLayerUploading.value = false
+//             return
+//         }
 
-        if (item.categorical) {
-            let data = {
-                Colname: item.categorical,
-                Widget: item.widget,
-                Refine_num: item.mask_refine,
-                Class: "Categorical",
-            }
-            mask_forall_data.push(data);
-        }
+//         if (item.categorical) {
+//             let data = {
+//                 Colname: item.categorical,
+//                 Widget: item.widget,
+//                 Refine_num: item.mask_refine,
+//                 Class: "Categorical",
+//             }
+//             mask_forall_data.push(data);
+//         }
 
-        if (item.numerical) {
-            let data = {
-                Colname: item.numerical,
-                Widget: item.widget,
-                Refine_num: item.mask_refine,
-                Class: "Numerical",
-            }
-            mask_forall_data.push(data);
-        }
-    }
+//         if (item.numerical) {
+//             let data = {
+//                 Colname: item.numerical,
+//                 Widget: item.widget,
+//                 Refine_num: item.mask_refine,
+//                 Class: "Numerical",
+//             }
+//             mask_forall_data.push(data);
+//         }
+//     }
 
-    let data = {
-        mask_forall: mask_forall_data,
-        chosen_image_id: maskData.value[0].image_id,
-    }
+//     let data = {
+//         mask_forall: mask_forall_data,
+//         chosen_image_id: maskData.value[0].image_id,
+//     }
 
-    defaultLayerUploading.value = true
-    generate_numerical_element(data).then(response => {
-        defalt_layer_example.value = response.defalt_layer_forexample.sort((a, b) => {
-            // descending order
-            return a.Position > b.Position ? -1 : 1
-        })
+//     defaultLayerUploading.value = true
+//     generate_numerical_element(data).then(response => {
+//         defalt_layer_example.value = response.defalt_layer_forexample.sort((a, b) => {
+//             // descending order
+//             return a.Position > b.Position ? -1 : 1
+//         })
 
-        defaultLayerUploading.value = false
-    }).catch(error => {
-        defaultLayerUploading.value = false
-        console.log(error)
-    })
-}
+//         defaultLayerUploading.value = false
+//     }).catch(error => {
+//         defaultLayerUploading.value = false
+//         console.log(error)
+//     })
+// }
 
 const showInputBar = (classString) => {
     return classString === "Numerical" ? 1 : 0
@@ -274,13 +287,12 @@ const uploadPreview = () => {
         }
 
         if (temp.Form === "Number_Path") {
-            temp["Path_Col"] = categorical_options.value[i]
+            temp["Path_Col"] = path_col.value[i]
         } else {
             temp["Path_Col"] = null
         }
         example_array_data.push(temp)
     }
-console.log(example_array_data);
 
     let data = {
         dic_array: example_array_data,
@@ -422,6 +434,14 @@ watch(() => [...form_selection.value], (newValue, _) => {
         }
     }
 })
+
+const getIndexByColname = (colname: string): number => {
+    for (let i = 0; i < maskData.value.length; i++) {
+        if (maskData.value[i].categorical === colname || maskData.value[i].numerical === colname) {
+            return i
+        }
+    }
+}
 
 const closeVegaEmbedding = () => {
     showVegaEmbedding.value = false
