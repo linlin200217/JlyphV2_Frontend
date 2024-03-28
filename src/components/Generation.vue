@@ -278,16 +278,18 @@ const uploadPreview = () => {
             mask_bool: defalt_layer_example.value[i].mask_bool,
         }
 
+        
+        let mask_index = getIndexByColname(defalt_layer_example.value[i].Colname)
         if (temp.Class === "Numerical") {
-            temp["Form"] = form_selection.value[i] || "Size"
-            temp["Gap"] = Number(gap_input.value[i]) || 20
+            temp["Form"] = form_selection.value[mask_index] || "Size"
+            temp["Gap"] = Number(gap_input.value[mask_index]) || 20
         } else {
             temp["Form"] = null
             temp["Gap"] = null
         }
 
         if (temp.Form === "Number_Path") {
-            temp["Path_Col"] = path_col.value[i]
+            temp["Path_Col"] = path_col.value[mask_index]
         } else {
             temp["Path_Col"] = null
         }
@@ -398,7 +400,7 @@ const uploadGeneration = () => {
             temp["Form"] = form_selection.value[i] || "Size"
             temp["Gap"] = Number(gap_input.value[i]) || 20
             if (temp.Form === "Number_Path") {
-                temp["Path_Col"] = categorical_options.value[i]
+                temp["Path_Col"] = path_col.value[i]
             } else {
                 temp["Path_Col"] = null
             }
