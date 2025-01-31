@@ -3,6 +3,7 @@ import request from './request'
 enum API {
   UPLOAD_POST = '/upload',
   PRE_GENERATE_POST = '/pregenerate',
+  UPLOAD_USER_IMAGE = '/upload_user_image',
   MASKSELECT_POST = '/maskselect',
   GENERATE_ELEMENT_POST = '/generate_element',
   REGENERATE = '/regenerate',
@@ -45,6 +46,23 @@ interface pregenerate_response_form {
 
 export const pregenerate_post = (data: pregenerate_request_form) =>
   request.post<any, pregenerate_response_form>(API.PRE_GENERATE_POST, data, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
+  })
+
+// --------- upload user image ---------
+
+interface user_image_request_form {
+
+}
+
+interface user_image_response_form {
+
+}
+
+export const upload_user_image = (data: user_image_request_form) =>
+  request.post<any, user_image_response_form>(API.UPLOAD_USER_IMAGE, data, {
     headers: {
       'Access-Control-Allow-Origin': '*',
     },

@@ -45,6 +45,15 @@
                     </svg>
                     Remove
                 </button>
+                <button class="btn btn-sm btn-ghost btn-outline text-dark-green w-26" @click="selectUserImage">
+                    <svg v-if="false" t="1708973332700" class="icon h-6" viewBox="0 0 1024 1024" version="1.1"
+                        xmlns="http://www.w3.org/2000/svg" p-id="4214">
+                        <path
+                            d="M448 256h128V128H448v128z m192-128v128h192a64 64 0 0 1 64 64v128a64 64 0 0 1-54.976 63.36l44.544 311.616a64 64 0 0 1-63.36 73.024H201.792a64 64 0 0 1-63.36-73.024L183.04 511.36A64 64 0 0 1 128 448V320a64 64 0 0 1 64-64h192V128a64 64 0 0 1 64-64h128a64 64 0 0 1 64 64z m136.512 320H832V320H576 448 192v128h584.512z m0 64H247.488l-45.696 320H320v-128h64v128h96v-128h64v128H640v-128h64v128h118.208l-45.696-320z"
+                            fill="#274E13" fill-opacity="1" p-id="4215"></path>
+                    </svg>
+                    Upload
+                </button>
                 <button class="btn btn-sm btn-ghost btn-outline text-dark-green w-36" @click="uploadMasks">
                     <span v-if="uploading" class="loading loading-dots loading-sm text-dark-green"></span>
                     <svg v-if="false" t="1708698132917" class="icon h-6" viewBox="0 0 1024 1024" version="1.1"
@@ -72,7 +81,7 @@ import 'd3-brush'
 import Icon from "./Icon.vue";
 import BaseFrame from "./BaseFrame.vue";
 
-import { maskselect_post, get_image_url } from '@/api/index.ts'
+import { maskselect_post, get_image_url, upload_user_image } from '@/api/index.ts'
 import { userSelection } from '@/store/modules/userSelection.ts'
 const { selectedImageId, maskData, Categorical_num, Numerical_num } = storeToRefs(userSelection());
 
@@ -151,6 +160,59 @@ const initBrush = () => {
         svg.call(brush)
     }
 }
+
+const selectUserImage = async () => {
+    // Create an input element of type 'file'
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*'; // Accept only image files
+
+    // Trigger the file selection dialog
+    input.click();
+
+    // Handle the file selection
+    input.onchange = async (event) => {
+        const file = event.target.files[0];
+
+        if (file) {
+            // Validate the file type
+            if (!file.type.startsWith('image/')) {
+                alert("Invalid file type. Please upload an image file.");
+                return;
+            }
+
+            // Prepare the form data for the upload
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                // Upload the image to the backend
+                const response = await upload_user_image(formData);
+                console.log(response);
+
+                // Todo
+                // selectedImageId.value = id
+            } catch (error) {
+                console.error("Error uploading image:", error);
+            }
+        }
+    };
+};
+
+// Example uploadImage function (you need to implement this based on your backend API)
+const uploadImage = async (formData) => {
+    const response = await fetch('/api/upload-image', {
+        method: 'POST',
+        body: formData,
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to upload image');
+    }
+
+    return response.json();
+};
+
 
 const clearBrush = () => {
     if (coverSvg.value) {

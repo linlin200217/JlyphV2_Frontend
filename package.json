@@ -4,29 +4,29 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host 0.0.0.0 --port 9015",
     "build": "vue-tsc && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "axios": "^1.6.7",
-    "d3": "^7.8.5",
+    "axios": "^1.7.9",
+    "d3": "^7.9.0",
     "d3-brush": "^3.0.0",
     "driver.js": "^1.3.1",
     "papaparse": "^5.4.1",
-    "pinia": "^2.1.7",
-    "vega-embed": "^6.24.0",
-    "vue": "^3.4.19",
+    "pinia": "^2.3.0",
+    "vega-embed": "^6.29.0",
+    "vue": "^3.5.13",
     "vuewordcloud": "^19.0.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.4",
-    "autoprefixer": "^10.4.17",
-    "daisyui": "^4.7.2",
-    "postcss": "^8.4.35",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5.2.2",
-    "vite": "^5.1.4",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "autoprefixer": "^10.4.20",
+    "daisyui": "^4.12.22",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.2",
+    "vite": "^5.4.11",
     "vue-tsc": "^1.8.27"
   }
 }
